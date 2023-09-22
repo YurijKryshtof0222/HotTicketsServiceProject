@@ -1,10 +1,8 @@
-import time
-
 from selenium import webdriver
 from selenium.webdriver import ActionChains
 from selenium.webdriver.common.by import By
 
-# from bs4 import BeautifulSoup
+import util
 
 url = "https://www.otpusk.ua/"
 driver = webdriver.Chrome()
@@ -15,16 +13,10 @@ to_country_id = 0
 days_id = 0
 
 
-def traverse_links():
-    href_list = (
-        driver.find_element(By.CLASS_NAME, 'src-containers-search-OtpuskSearchPageTemplate-styles__resultsWrapper')
-        .find_elements(By.TAG_NAME, 'a'))
-    return (a.get_attribute('href') for a in href_list if a.get_attribute('href'))
-
 
 def read_travel_info(url):
     driver.get(url)
-    time.sleep(5)
+    util.wait_for_element_presence(driver, delay=10, by=By.CLASS_NAME, value='src-pages-Offer-styles__head')
 
     header = driver.find_element(By.CLASS_NAME, 'src-pages-Offer-styles__head')
     hotel_name = header.find_element(By.TAG_NAME, 'h1').text
@@ -76,9 +68,10 @@ try:
     select_to_country = driver.find_element(By.ID, f'downshift-2-item-{days_id}')
     action.click(select_to_country).click(find_button_element).perform()
 
-    time.sleep(10)
+    util.wait_for_element_presence(driver, 5, By.CLASS_NAME, 'src-components-result-Card-styles__root')
+    # time.sleep(10)
 
-    links = list(traverse_links())
+    links = list(util.traverse_links(driver))
 
     for a in links:
         read_travel_info(a)
