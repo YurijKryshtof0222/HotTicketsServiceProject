@@ -3,8 +3,9 @@ from selenium.webdriver.support import expected_conditions
 from selenium.webdriver.support.wait import WebDriverWait
 
 
-def traverse_links(driver):
-    href_list = (driver.find_element(By.CLASS_NAME, 'src-containers-search-OtpuskSearchPageTemplate-styles__resultsWrapper')
+def present_links(driver, by, value):
+    href_list = (driver.find_element(By.CLASS_NAME, 'src-containers-search-OtpuskSearchPageTemplate'
+                                                    '-styles__resultsWrapper')
                        .find_elements(By.TAG_NAME, 'a'))
     return (a.get_attribute('href') for a in href_list if a.get_attribute('href'))
 
