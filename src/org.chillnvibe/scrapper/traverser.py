@@ -2,33 +2,16 @@ import logging
 import util
 import time
 
-from selenium import webdriver
-from selenium.webdriver import ActionChains
 from selenium.webdriver.common.by import By
 
-
-url = "https://www.otpusk.ua/"
-driver = webdriver.Chrome()
-action = ActionChains(driver)
-
 log_filename = time.strftime("%Y%m%d_%H%M%S")
-logging.basicConfig(format='%(asctime)s %(name)s %(levelname)s\n\tINFO:%(message)s ',
+logging.basicConfig(format='%(asctime)s %(name)s %(levelname)s\nINFO:%(message)s ',
                     level=logging.ERROR,
                     filename=f"logs/errors/{log_filename}.log",
                     filemode="w",
                     datefmt='%Y-%m-%d %H:%M:%S')
 
-from_country_id = 0
-to_country_id = 0
-days_id = 0
-
-
-def traverse_links():
-    return util.present_links(driver, By.CLASS_NAME, 'src-containers-search-OtpuskSearchPageTemplate'
-                                                     '-styles__resultsWrapper')
-
-
-def read_travel_info(url):
+def read_offer_info(driver, url):
     driver.get(url)
     util.wait_for_element_presence(driver, delay=10, by=By.CLASS_NAME, value='src-pages-Offer-styles__head')
 
@@ -77,8 +60,7 @@ def read_travel_info(url):
     print()
 
 
-try:
-    driver.get(url=url)
+def get_offer_links(driver, action, from_country_id= 0, to_country_id= 0, days_id= 0):
     filter_element = driver.find_element(By.CLASS_NAME,
                                          'src-containers-search-OtpuskInlineSearchForm-styles__submit')
     find_button_element = filter_element.find_element(By.TAG_NAME, 'button')
@@ -88,27 +70,13 @@ try:
     select_from_country = driver.find_element(By.ID, f'downshift-0-item-{from_country_id}')
     action.click(select_from_country).perform()
 
-    select_to_country = driver.find_element(By.ID, f'downshift-1-item-{from_country_id}')
+    select_to_country = driver.find_element(By.ID, f'downshift-1-item-{to_country_id}')
     action.click(select_to_country).perform()
 
     select_to_country = driver.find_element(By.ID, f'downshift-2-item-{days_id}')
     action.click(select_to_country).click(find_button_element).perform()
 
     util.wait_for_element_presence(driver, 15, By.CLASS_NAME, 'src-components-result-Card-styles__root')
-    # time.sleep(10)
 
-    links = list(traverse_links())
-
-    for a in links:
-        try:
-            read_travel_info(a)
-        except Exception as ex:
-            logging.error(
-                f'Cannot parsing the proposal by link: {a}\n{ex}')
-    # check_travel_info(links[0])
-
-except Exception as ex:
-    print(ex)
-finally:
-    driver.close()
-    driver.quit()
+    return util.present_links(driver, By.CLASS_NAME, 'src-containers-search-OtpuskSearchPageTemplate'
+                                                     '-styles__resultsWrapper')
