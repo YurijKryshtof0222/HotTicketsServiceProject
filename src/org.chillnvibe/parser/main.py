@@ -1,16 +1,22 @@
 import logging
+import util
+import time
 
 from selenium import webdriver
 from selenium.webdriver import ActionChains
 from selenium.webdriver.common.by import By
 
-import util
 
 url = "https://www.otpusk.ua/"
 driver = webdriver.Chrome()
 action = ActionChains(driver)
 
-logging.basicConfig(level=logging.ERROR, filename="logs/error.log", filemode="w")
+log_filename = time.strftime("%Y%m%d_%H%M%S")
+logging.basicConfig(format='%(asctime)s %(name)s %(levelname)s\n\tINFO:%(message)s ',
+                    level=logging.ERROR,
+                    filename=f"logs/errors/{log_filename}.log",
+                    filemode="w",
+                    datefmt='%Y-%m-%d %H:%M:%S')
 
 from_country_id = 0
 to_country_id = 0
@@ -36,21 +42,18 @@ def read_travel_info(url):
 
     hotel_offer_info_el = driver.find_element(By.CLASS_NAME, 'src-containers-hotel-Offer-styles__offerContainer')
 
-    date_title_el = (hotel_offer_info_el
-                     .find_element(By.CLASS_NAME, 'src-containers-hotel-Offer-styles__titleDate')
-                     .find_element(By.XPATH, '..'))
+    date_title_el = util.find_parent_element_of_child(
+        hotel_offer_info_el, 'src-containers-hotel-Offer-styles__titleDate')
     date_interval_info_el = date_title_el.find_element(By.TAG_NAME, 'strong')
     nights_count = (date_title_el.find_element(By.TAG_NAME, 'div')
-                    .find_element(By.TAG_NAME, 'div'))
+                                 .find_element(By.TAG_NAME, 'div'))
 
-    food_title_el = (hotel_offer_info_el
-                         .find_element(By.CLASS_NAME, 'src-containers-hotel-Offer-styles__titleTourists')
-                         .find_element(By.XPATH, '..'))
-    tourists_count_info_el = food_title_el.find_element(By.TAG_NAME, 'strong')
+    title_tourists_el = util.find_parent_element_of_child(
+        hotel_offer_info_el, 'src-containers-hotel-Offer-styles__titleTourists')
+    tourists_count_info_el = title_tourists_el.find_element(By.TAG_NAME, 'strong')
 
-    food_title_el = (hotel_offer_info_el
-                         .find_element(By.CLASS_NAME, 'src-containers-hotel-Offer-styles__titleRoomFood')
-                         .find_element(By.XPATH, '..'))
+    food_title_el = util.find_parent_element_of_child(
+        hotel_offer_info_el, 'src-containers-hotel-Offer-styles__titleRoomFood')
     food_info = food_title_el.find_elements(By.TAG_NAME, 'strong')[1]
 
     hotel_description = [el.text for el in (driver.find_element(By.CLASS_NAME, 'src-pages-Offer-styles__hotelInfo')
@@ -100,7 +103,8 @@ try:
         try:
             read_travel_info(a)
         except Exception as ex:
-            logging.error(ex)
+            logging.error(
+                f'Cannot parsing the proposal by link: {a}\n{ex}')
     # check_travel_info(links[0])
 
 except Exception as ex:
