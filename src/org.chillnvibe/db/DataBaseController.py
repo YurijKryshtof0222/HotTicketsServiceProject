@@ -1,4 +1,5 @@
 import sqlite3
+import json
 class DbController:
     def __init__(self, db_name):
         self.db_name = db_name
@@ -6,25 +7,23 @@ class DbController:
         self.cursor = self.conn.cursor()
         self.create_table()
 
+
+    #using for init data base
     def create_table(self):
         # Створюємо таблицю, якщо вона не існує
-        create_table_offer_variation = '''
-            CREATE TABLE IF NOT EXISTS offer_variation (
-                variation_id INTEGER,
-                offer_id INTEGER,
-                night_count INTEGER,
-                start_date DATE,
-                end_date DATE
-            );
-        '''
         create_table_offer = '''
                     CREATE TABLE IF NOT EXISTS offer (
-                        offer_id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        uniq_id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        offer_id INTEGER,
                         offer_name STRING,
                         offer_source STRING,
                         location STRING,
+                        people_count INTEGER,
                         description STRING,
-                        food_info STRING
+                        food_info STRING,
+                        night_count INTEGER,
+                        start_date DATE,
+                        end_date DATE
                     );
                 '''
         create_table_offer_links = '''
@@ -35,26 +34,17 @@ class DbController:
                             );
                         '''
         self.cursor.execute(create_table_offer)
-        self.cursor.execute(create_table_offer_variation)
         self.cursor.execute(create_table_offer_links)
         self.conn.commit()
 
-    def add_data(self, uniq_id, offer_name, offer_source, location, description, food_info, night_count, start_date, end_date, links):
+    #add record (tour) to database
+    def add_data(self, offer_id, offer_name, offer_source, location, people_count, description, food_info, night_count, start_date, end_date, links):
         # Insert data into the "offer" and "offer_variation" tables
         insert_to_offer_sql = '''
-                            INSERT INTO offer (offer_id, offer_name, offer_source, location, description, food_info)
-                            VALUES (?, ?, ?, ?, ?, ?);
+                            INSERT INTO offer (uniq_id, offer_id, offer_name, offer_source, location, people_count, description, food_info, night_count, start_date, end_date)
+                            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
                         '''
-        self.cursor.execute(insert_to_offer_sql, (None, offer_name, offer_source, location, description, food_info))
-        self.conn.commit()
-
-        # Get the last inserted row ID (offer_id)
-        offer_id = self.cursor.lastrowid
-        insert_to_offer_variation_sql = '''
-                               INSERT INTO offer_variation (variation_id, offer_id, night_count, start_date, end_date)
-                               VALUES (?, ?, ?, ?, ?);
-                           '''
-        self.cursor.execute(insert_to_offer_variation_sql, (uniq_id, offer_id, night_count, start_date, end_date))
+        self.cursor.execute(insert_to_offer_sql, (None, offer_id, offer_name, offer_source, location, people_count, description, food_info, night_count, start_date, end_date))
         self.conn.commit()
         for link in links:
             insert_to_offer_links_sql = '''
@@ -64,14 +54,46 @@ class DbController:
             self.cursor.execute(insert_to_offer_links_sql, (None, offer_id, link))
             self.conn.commit()
 
-    def delete_data(self, variation_id):
-        # Видаляємо дані з таблиці за ідентифікатором
-        delete_data_sql = '''
-            DELETE FROM my_table
-            WHERE id = ?;
-        '''
-        self.cursor.execute(delete_data_sql, (data_id,))
-        self.conn.commit()
+
+    #select all record with pagination
+    def get_all_records_as_json(self, page, limit):
+        # Calculate the offset based on the page and limit
+        offset = (page - 1) * limit
+
+        query = '''
+               SELECT * FROM offer ORDER BY uniq_id DESC LIMIT ? OFFSET ?
+           '''
+        self.cursor.execute(query, (limit, offset))
+        rows = self.cursor.fetchall()
+
+        records = []
+        for row in rows:
+            offer_id = row[1]
+            query_links = '''
+                       SELECT * FROM offer_links WHERE offer_id = ?;
+                   '''
+            self.cursor.execute(query_links, (offer_id,))
+            links_row = self.cursor.fetchall()
+            links = []
+            for link in links_row:
+                links.append(link[2])
+
+            record = {
+                "offer_id": row[1],
+                "offer_name": row[2],
+                "offer_source": row[3],
+                "location": row[4],
+                "people_count": row[5],
+                "description": row[6],
+                "food_info": row[7],
+                "night_count": row[8],
+                "start_date": row[9],
+                "end_date": row[10],
+                "links": links
+            }
+            records.append(record)
+
+        return json.dumps(records)
 
     def close_connection(self):
         self.conn.close()
