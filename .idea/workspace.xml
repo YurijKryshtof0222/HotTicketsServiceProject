@@ -5,8 +5,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="d7b5985e-0455-4d17-9670-f473a9b98ed0" name="Changes" comment="First version db controller">
-      <change afterPath="$PROJECT_DIR$/src/org.chillnvibe/db/__init__.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/org.chillnvibe/db/DataBaseController.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/org.chillnvibe/db/DataBaseController.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -36,14 +35,14 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;bd&quot;,
-    &quot;last_opened_file_path&quot;: &quot;C:/Users/miste/PycharmProjects/HotTicketsProject&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "RunOnceActivity.OpenProjectViewOnStart": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "git-widget-placeholder": "restApi",
+    "last_opened_file_path": "C:/Users/miste/PycharmProjects/HotTicketsProject"
   }
-}</component>
+}]]></component>
   <component name="RunManager">
     <configuration name="example" type="PythonConfigurationType" factoryName="Python" nameIsGenerated="true">
       <module name="HotTicketsProject" />
