@@ -28,9 +28,9 @@ if __name__ == '__main__':
     driver.quit()
 
     for from_country in from_country_elements_list:
-        for to_country in to_country_elements_list:
+        for to_country in to_country_elements_list[1:]:
             for duration in duration_elements_list:
                 try:
-                    search_container.traverse_offer_links(from_country, to_country, duration)
+                    search_container.traverse_offer_links(from_country, to_country, duration, limit=4)
                 except Exception as ex:
                     logging.error(f'Cannot traverse links from these choice combination:\n{ex}')

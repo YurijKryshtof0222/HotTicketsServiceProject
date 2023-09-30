@@ -77,16 +77,19 @@ def get_offer_links(driver,
                     action_chain,
                     from_country_item,
                     to_country_item,
-                    duration_item):
+                    duration_item,
+                    limit):
     search_container_element = driver.find_element(By.ID, 'otp_search_form')
 
     downshift_element = search_container_element.find_element(By.CLASS_NAME, 'src-components-ui-Autocomplete'
                                                                              '-styles__input')
     action_chain.click(downshift_element).perform()
 
+    util.wait_for_element_presence(driver, 5, By.ID, from_country_item)
     select_from_country = driver.find_element(By.ID, from_country_item)
     action_chain.click(select_from_country).perform()
 
+    util.wait_for_element_presence(driver, 5, By.ID, to_country_item)
     select_to_country = driver.find_element(By.ID, to_country_item)
     action_chain.click(select_to_country).perform()
 
@@ -102,4 +105,4 @@ def get_offer_links(driver,
     util.wait_for_element_presence(driver, 15, By.CLASS_NAME, 'src-components-result-Card-styles__root')
 
     return util.present_links(driver, By.CLASS_NAME, 'src-containers-search-OtpuskSearchPageTemplate'
-                                                     '-styles__resultsWrapper')
+                                                     '-styles__resultsWrapper', limit=limit)
