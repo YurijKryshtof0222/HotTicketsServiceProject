@@ -1,2 +1,4 @@
 src/org.chillnvibe/scrapper/logs/errors
+src/org.chillnvibe/scrapper/__pycache__/
+.idea/
 !src/org.chillnvibe/scrapper/logs/errors/__init__.py
