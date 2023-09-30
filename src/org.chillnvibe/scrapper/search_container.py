@@ -14,18 +14,20 @@ def traverse_offer_links(from_country_item, to_country_item, days_item, limit=0)
     temp_driver.get(url='https://www.otpusk.ua/')
     temp_action_chain = ActionChains(temp_driver)
     try:
-        links = list(retriever.get_offer_links(
+        links = retriever.get_offer_links(
             driver=temp_driver,
             action_chain=temp_action_chain,
             from_country_item=from_country_item,
             to_country_item=to_country_item,
             duration_item=days_item,
-            limit=limit))
+            limit=limit)
         for a in links:
             try:
                 retriever.get_offer_info(temp_driver, a)
             except Exception as ex:
                 logging.error(f'Cannot parsing the proposal by link: {a}\n{ex}')
+    except Exception as ex:
+        logging.error(f'Cannot retrieve links:\n{ex}')
     finally:
         temp_driver.close()
         temp_driver.quit()

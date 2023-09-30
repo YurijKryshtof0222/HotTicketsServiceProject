@@ -1,8 +1,11 @@
 import logging
+
+from selenium.webdriver.support import expected_conditions
+from selenium.webdriver.support.wait import WebDriverWait
+from selenium.webdriver.common.by import By
+
 import util
 import time
-
-from selenium.webdriver.common.by import By
 
 log_filename = time.strftime("%Y%m%d_%H%M%S")
 logging.basicConfig(format='%(asctime)s %(name)s %(levelname)s\nINFO:%(message)s ',
@@ -17,8 +20,8 @@ def get_offer_info(driver, url):
     util.wait_for_element_presence(driver, delay=10, by=By.CLASS_NAME, value='src-pages-Offer-styles__head')
 
     offer_id = int((driver.find_element(By.CLASS_NAME, 'src-containers-hotel-Offer-styles__offerCode')
-                           .text.split(':')[-1]
-                           .replace(' ', '')))
+                    .text.split(':')[-1]
+                    .replace(' ', '')))
 
     header = driver.find_element(By.CLASS_NAME, 'src-pages-Offer-styles__head')
     hotel_name = header.find_element(By.TAG_NAME, 'h1').text
@@ -30,7 +33,7 @@ def get_offer_info(driver, url):
         hotel_offer_info_el, 'src-containers-hotel-Offer-styles__titleDate')
     date_interval_info_el = date_title_el.find_element(By.TAG_NAME, 'strong')
     nights_count = (date_title_el.find_element(By.TAG_NAME, 'div')
-                                 .find_element(By.TAG_NAME, 'div'))
+                    .find_element(By.TAG_NAME, 'div'))
 
     title_tourists_el = util.find_parent_element_of_child(
         hotel_offer_info_el, 'src-containers-hotel-Offer-styles__titleTourists')
@@ -48,9 +51,9 @@ def get_offer_info(driver, url):
                                             .find_elements(By.TAG_NAME, 'span'))]
 
     price_info = int(hotel_offer_info_el.find_element(By.CLASS_NAME, 'src-containers-hotel-Offer-styles__priceBlock')
-                                        .find_element(By.TAG_NAME,  'nobr')
-                                        .text.split(' грн')[0]
-                                        .replace(' ', ''))
+                     .find_element(By.TAG_NAME, 'nobr')
+                     .text.split(' грн')[0]
+                     .replace(' ', ''))
 
     print(f'Offer ID: {offer_id}',
 
@@ -102,7 +105,12 @@ def get_offer_links(driver,
     action_chain.click(select_duration).click(find_button_element).perform()
 
     # time.sleep(5)
-    util.wait_for_element_presence(driver, 15, By.CLASS_NAME, 'src-components-result-Card-styles__root')
+    time.sleep(10)
+
+    no_results_msg_element = driver.find_elements(By.CLASS_NAME, 'src-components-result'
+                                                                '-SearchNothingFound-styles__root')
+    if no_results_msg_element:
+        return set()
 
     return util.present_links(driver, By.CLASS_NAME, 'src-containers-search-OtpuskSearchPageTemplate'
                                                      '-styles__resultsWrapper', limit=limit)
