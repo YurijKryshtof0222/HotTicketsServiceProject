@@ -10,7 +10,7 @@ def present_links(driver, by, value):
     #     href = a.get_attribute('href')
     #     if href:
     #         yield href
-    return (a.get_attribute('href') for a in href_list if a.get_attribute('href'))
+    return {a.get_attribute('href') for a in href_list if a.get_attribute('href')}
 
 
 def wait_for_element_presence(driver, delay, by, value):
