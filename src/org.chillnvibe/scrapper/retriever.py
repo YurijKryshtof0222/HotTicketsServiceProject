@@ -6,6 +6,8 @@ from selenium.webdriver.common.by import By
 
 import util
 import time
+import date_converter
+import offer_img_retriever
 
 log_filename = time.strftime("%Y%m%d_%H%M%S")
 logging.basicConfig(format='%(asctime)s %(name)s %(levelname)s\nINFO:%(message)s ',
@@ -32,6 +34,11 @@ def get_offer_info(driver, url):
     date_title_el = util.find_parent_element_of_child(
         hotel_offer_info_el, 'src-containers-hotel-Offer-styles__titleDate')
     date_interval_info_el = date_title_el.find_element(By.TAG_NAME, 'strong')
+
+    date_interval_tuple = date_converter.convert_do_date(date_interval_info_el.text)
+    date_interval_info_start = date_interval_tuple[0]
+    date_interval_info_end = date_interval_tuple[1]
+
     nights_count = (date_title_el.find_element(By.TAG_NAME, 'div')
                     .find_element(By.TAG_NAME, 'div'))
 
@@ -55,13 +62,16 @@ def get_offer_info(driver, url):
                      .text.split(' грн')[0]
                      .replace(' ', ''))
 
+    images = list(offer_img_retriever.retrieve_img_urls(driver=driver))
+
     print(f'Offer ID: {offer_id}',
 
           f'Offer name: {hotel_name}',
           f'Location: {location_info}',
 
           f'Nights count: {nights_count.text}',
-          f'Dates: {date_interval_info_el.text}',
+          f'Start Date: {date_interval_info_start.strftime("%d.%m.%Y")}',
+          f'End Date: {date_interval_info_end.strftime("%d.%m.%Y")}',
 
           f'Transport: {transport_from_info.text}',
           f'Price: {price_info}',
@@ -72,7 +82,11 @@ def get_offer_info(driver, url):
           f'link: {url}',
           f'Description: {hotel_description[1]}',
 
+          f'Images:',
           sep='\n')
+    print('\t')
+    for e in images:
+        print(e)
     print()
 
 
@@ -108,7 +122,7 @@ def get_offer_links(driver,
     time.sleep(10)
 
     no_results_msg_element = driver.find_elements(By.CLASS_NAME, 'src-components-result'
-                                                                '-SearchNothingFound-styles__root')
+                                                                 '-SearchNothingFound-styles__root')
     if no_results_msg_element:
         return set()
 
