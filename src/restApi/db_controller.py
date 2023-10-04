@@ -1,5 +1,7 @@
 import sqlite3
 import json
+
+
 class DbController:
     def __init__(self, db_name):
         self.db_name = db_name
@@ -23,7 +25,9 @@ class DbController:
                         food_info STRING,
                         night_count INTEGER,
                         start_date DATE,
-                        end_date DATE
+                        end_date DATE,
+                        transport_info STRING,
+                        price INTEGER
                     );
                 '''
         create_table_offer_links = '''
@@ -38,10 +42,34 @@ class DbController:
         self.conn.commit()
 
     #add record (tour) to database
-    def add_data(self, offer_id, offer_name, offer_source, location, people_count, description, food_info, night_count, start_date, end_date, links):
+    def add_data(self,
+                 offer_id,
+                 offer_name,
+                 offer_source,
+                 location,
+                 people_count,
+                 description,
+                 food_info,
+                 night_count,
+                 start_date,
+                 end_date,
+                 transport_info,
+                 price,
+                 links):
         # Insert data into the "offer" and "offer_variation" tables
         insert_to_offer_sql = '''
-                            INSERT INTO offer (uniq_id, offer_id, offer_name, offer_source, location, people_count, description, food_info, night_count, start_date, end_date)
+                            INSERT INTO offer (
+                            uniq_id, 
+                            offer_id, 
+                            offer_name, 
+                            offer_source, 
+                            location, 
+                            people_count, 
+                            description, 
+                            food_info, 
+                            night_count, 
+                            start_date, 
+                            end_date)
                             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
                         '''
         self.cursor.execute(insert_to_offer_sql, (None, offer_id, offer_name, offer_source, location, people_count, description, food_info, night_count, start_date, end_date))

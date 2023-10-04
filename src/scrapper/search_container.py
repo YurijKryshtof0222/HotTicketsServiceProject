@@ -4,17 +4,17 @@ from selenium.webdriver import ActionChains
 from selenium import webdriver
 
 import util
-import retriever
+import offer_retriever
 
 from selenium.webdriver.common.by import By
 
 
-def traverse_offer_links(from_country_item, to_country_item, days_item, limit=0):
+def traverse_offer_links(from_country_item, to_country_item, days_item, db, limit=0):
     temp_driver = webdriver.Chrome()
     temp_driver.get(url='https://www.otpusk.ua/')
     temp_action_chain = ActionChains(temp_driver)
     try:
-        links = retriever.get_offer_links(
+        links = offer_retriever.get_offer_links(
             driver=temp_driver,
             action_chain=temp_action_chain,
             from_country_item=from_country_item,
@@ -23,7 +23,7 @@ def traverse_offer_links(from_country_item, to_country_item, days_item, limit=0)
             limit=limit)
         for a in links:
             try:
-                retriever.get_offer_info(temp_driver, a)
+                offer_retriever.scrape_offer_from_url(temp_driver, a, db)
             except Exception as ex:
                 logging.error(f'Cannot parsing the proposal by link: {a}\n{ex}')
     except Exception as ex:

@@ -1,4 +1,4 @@
-from DataBaseController import DbController
+from db_controller import DbController
 
 if __name__ == '__main__':
     db_controller = DbController("my_database.db")

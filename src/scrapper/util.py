@@ -22,6 +22,11 @@ def wait_for_element_presence(driver, delay, by, value):
         expected_conditions.presence_of_element_located((by, value)))
 
 
+def wait_for_then_click(driver, delay, by, value, action_chain):
+    wait_for_element_presence(driver, delay, by, value)
+    select_to_country = driver.find_element(by, value)
+    action_chain.click(select_to_country).perform()
+
 
 def find_parent_element_of_child(enclosed_element, child_element, by=By.CLASS_NAME):
     return (enclosed_element.find_element(by, child_element)
