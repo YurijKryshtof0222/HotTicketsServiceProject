@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from src.restApi import db_controller
+from src.restapi import db_controller
 
 
 class Offer:
@@ -57,14 +57,16 @@ class Offer:
 
     def add_to_db(self, db: db_controller.DbController):
         db.add_data(
-            self._offer_id,
-            self._name,
-            self._source,
-            self._location,
-            self._people_count,
-            self._description,
-            self._food_info,
-            self._night_count,
-            self._start_date,
-            self._end_date,
-            self._img_links)
+            offer_id=self._offer_id,
+            offer_name=self._name,
+            offer_source=self._source,
+            location=self._location,
+            people_count=self._people_count,
+            description=self._description,
+            food_info=self._food_info,
+            night_count=self._night_count,
+            start_date=self._start_date,
+            end_date=self._end_date,
+            transport_info=self._transport_info,
+            price=self._price,
+            links=self._img_links)

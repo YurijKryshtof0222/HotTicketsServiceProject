@@ -6,7 +6,7 @@ import search_container
 from selenium import webdriver
 from selenium.webdriver import ActionChains
 
-from src.restApi import db_controller
+from src.restapi import db_controller
 
 log_filename = time.strftime("%Y%m%d_%H%M%S")
 logging.basicConfig(format='%(asctime)s %(name)s %(levelname)s\nINFO:%(message)s ',

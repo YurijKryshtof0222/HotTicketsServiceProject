@@ -69,10 +69,26 @@ class DbController:
                             food_info, 
                             night_count, 
                             start_date, 
-                            end_date)
-                            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+                            end_date,
+                            transport_info,
+                            price)
+                            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
                         '''
-        self.cursor.execute(insert_to_offer_sql, (None, offer_id, offer_name, offer_source, location, people_count, description, food_info, night_count, start_date, end_date))
+        self.cursor.execute(insert_to_offer_sql, (
+                                                  None,
+                                                  offer_id,
+                                                  offer_name,
+                                                  offer_source,
+                                                  location,
+                                                  people_count,
+                                                  description,
+                                                  food_info,
+                                                  night_count,
+                                                  start_date,
+                                                  end_date,
+                                                  transport_info,
+                                                  price
+                                                  ))
         self.conn.commit()
         for link in links:
             insert_to_offer_links_sql = '''

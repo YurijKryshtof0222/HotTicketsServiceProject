@@ -83,19 +83,19 @@ def get_offer_info(driver, url):
 
     images = list(retrieve_img_urls(driver=driver))
 
-    return Offer(offer_id,
-                 offer_name,
-                 url,
-                 location_info,
-                 people_count,
-                 hotel_description[1],
-                 food_info,
-                 nights_count,
-                 start_date,
-                 end_date,
-                 transport_from_info,
-                 price_info,
-                 images)
+    return Offer(offer_id=offer_id,
+                 name=offer_name,
+                 source=url,
+                 location=location_info,
+                 people_count=people_count,
+                 description=hotel_description[1],
+                 food_info=food_info,
+                 night_count=nights_count,
+                 start_date=start_date,
+                 end_date=end_date,
+                 transport_info=transport_from_info,
+                 price=price_info,
+                 img_links=images)
 
 
 def scrape_offer_from_url(driver, url, db, log_to_console: bool = True):
