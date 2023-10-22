@@ -68,7 +68,7 @@ class DbController:
                 "links": links
             }
             records.append(record)
-        return json.dumps(records)
+        return json.dumps(records, ensure_ascii=False).encode('utf-8')
 
     # add record (tour) to database
     def add_data(self,

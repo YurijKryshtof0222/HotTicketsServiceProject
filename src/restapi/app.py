@@ -3,6 +3,7 @@ from flask_sqlalchemy import SQLAlchemy
 from db_controller import DbController
 
 app = Flask(__name__)
+app.config['JSON_AS_ASCII'] = False
 db = DbController("../my_database.db")
 
 
