@@ -21,7 +21,7 @@ if __name__ == '__main__':
     driver.get(url='https://www.otpusk.ua/')
     action_chain = ActionChains(driver)
 
-    db_controller_instance = db_controller.DbController("my_database.db")
+    db_controller_instance = db_controller.DbController("..\my_database.db")
     db_controller_instance.create_table()
 
     from_country_elements_list = search_container.retrieve_from_countries_items(driver=driver, action_chain=action_chain)
