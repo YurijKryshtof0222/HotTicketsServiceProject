@@ -1,5 +1,6 @@
 import sqlite3
-import json
+
+from flask import jsonify
 
 
 class DbController:
@@ -40,20 +41,23 @@ class DbController:
         self.cursor.execute(create_table_offer_links)
         self.conn.commit()
 
-    def __execute_query(self, query, limit, offset):
+    def __convert_to_json(self, query, limit, offset):
         self.cursor.execute(query, (limit, offset))
         rows = self.cursor.fetchall()
+
         records = []
+
         for row in rows:
             offer_id = row[1]
             query_links = '''
-                                       SELECT * FROM offer_links WHERE offer_id = ?;
-                                   '''
+                                   SELECT * FROM offer_links WHERE offer_id = ?;
+                               '''
             self.cursor.execute(query_links, (offer_id,))
             links_row = self.cursor.fetchall()
             links = []
             for link in links_row:
                 links.append(link[2])
+
             record = {
                 "offer_id": row[1],
                 "offer_name": row[2],
@@ -67,8 +71,10 @@ class DbController:
                 "end_date": row[10],
                 "links": links
             }
+
             records.append(record)
-        return json.dumps(records, ensure_ascii=False).encode('utf-8')
+
+        return jsonify({'offer': records})
 
     # add record (tour) to database
     def add_data(self,
@@ -128,74 +134,28 @@ class DbController:
             self.conn.commit()
 
     # select all record with pagination
-    def get_all_records_as_json(self, page, limit):
+    def get_all_records_as_json(self, page, limit, where=''):
         # Calculate the offset based on the page and limit
         offset = (page - 1) * limit
 
         query = '''
-               SELECT * FROM offer ORDER BY uniq_id DESC LIMIT ? OFFSET ?
+               SELECT * FROM offer 
            '''
-        return self.__execute_query(query, limit, offset)
 
-    def get_filtered_records_as_json(self,
-                                     page,
-                                     limit,
-                                     offer_name='',
-                                     country='',
-                                     people_count_operation='',
-                                     people_count_value=0,
-                                     food_info='',
-                                     night_count_operation='',
-                                     night_count_value=0,
-                                     start_date_operation='',
-                                     start_date_value=0,
-                                     end_date_operation='',
-                                     end_date_value=0,
-                                     price_operation='',
-                                     price_value=0):
-        # Calculate the offset based on the page and limit
-        offset = (page - 1) * limit
+        if where and where.strip():
+            where_args = where.split('&')
+            length = len(where_args)
 
-        conditions_dict = list()
+            query += "WHERE "
+            for i in range(length):
+                query += where_args[i]
+                if i != length - 1:
+                    query += " AND "
 
-        conditions_dict.append(f'offer_name =  "{offer_name}"'
-                               if offer_name and offer_name.strip() else '')
-        conditions_dict.append(f'location LIKE "{country}"%'
-                               if country and country.strip() else '')
-        conditions_dict.append(f' people_count  {people_count_operation} {people_count_value}'
-                               if (people_count_operation
-                                   and people_count_operation.strip()
-                                   and people_count_value > 0) else '')
-        conditions_dict.append(f'food_info = "{food_info}"' if (food_info and food_info.strip()) else '')
-        conditions_dict.append(f'night_count {night_count_operation} {night_count_value}'
-                               if (night_count_operation
-                                   and night_count_operation.strip()
-                                   and night_count_value > 0) else '')
-        conditions_dict.append(f'start_date {end_date_operation}, {end_date_value}'
-                               if (end_date_operation
-                                   and end_date_operation.strip()
-                                   and end_date_value > 0) else '')
-        conditions_dict.append(f'start_date {start_date_operation}, {start_date_value}'
-                               if (start_date_operation
-                                   and start_date_operation.strip()
-                                   and start_date_value > 0) else '')
-        conditions_dict.append(f'price {price_operation} {price_value}'
-                               if (price_operation
-                                   and price_operation.strip()
-                                   and price_value > 0) else '')
-        query = "SELECT * FROM offer WHERE "
-
-        is_first_cond = True
-        for condition in conditions_dict:
-            if condition:
-                if not is_first_cond:
-                    query += 'AND ' + condition
-                    is_first_cond = False
-                else:
-                    query += condition
-
-        query += ' ORDER BY uniq_id DESC LIMIT ? OFFSET ?'
-        return self.__execute_query(query, limit, offset)
+        query += """
+            \nORDER BY uniq_id DESC LIMIT ? OFFSET ?
+        """
+        return self.__convert_to_json(query, limit, offset)
 
     def close_connection(self):
         self.conn.close()
