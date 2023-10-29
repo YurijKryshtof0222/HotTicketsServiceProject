@@ -4,6 +4,13 @@ from flask import jsonify
 
 
 class DbController:
+    __instance = None
+
+    def __new__(cls, *args, **kwargs):
+        if not DbController.__instance:
+            DbController.__instance = super().__new__(cls)
+        return DbController.__instance
+
     def __init__(self, db_name):
         self.db_name = db_name
         self.conn = sqlite3.connect(db_name, check_same_thread=False)
