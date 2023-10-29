@@ -77,20 +77,7 @@ class DbController:
         return jsonify({'offer': records})
 
     # add record (tour) to database
-    def add_data(self,
-                 offer_id,
-                 offer_name,
-                 offer_source,
-                 location,
-                 people_count,
-                 description,
-                 food_info,
-                 night_count,
-                 start_date,
-                 end_date,
-                 transport_info,
-                 price,
-                 links):
+    def add_offer(self, offer):
         # Insert data into the "offer" and "offer_variation" tables
         insert_to_offer_sql = '''
                             INSERT INTO offer (
@@ -111,21 +98,21 @@ class DbController:
                         '''
         self.cursor.execute(insert_to_offer_sql, (
             None,
-            offer_id,
-            offer_name,
-            offer_source,
-            location,
-            people_count,
-            description,
-            food_info,
-            night_count,
-            start_date,
-            end_date,
-            transport_info,
-            price
+            offer.offer_id,
+            offer.name,
+            offer.source,
+            offer.location,
+            offer.people_count,
+            offer.description,
+            offer.food_info,
+            offer.night_count,
+            offer.start_date,
+            offer.end_date,
+            offer.transport_info,
+            offer.price
         ))
         self.conn.commit()
-        for link in links:
+        for link in offer.img_links:
             insert_to_offer_links_sql = '''
                            INSERT INTO offer_links (link_id, offer_id, link)
                            VALUES (?, ?, ?);

@@ -6,7 +6,7 @@ from selenium.webdriver.common.by import By
 import util
 import time
 import date_converter
-from offer import Offer
+from src.offer import Offer
 
 log_filename = time.strftime("%Y%m%d_%H%M%S")
 logging.basicConfig(format='%(asctime)s %(name)s %(levelname)s\nINFO:%(message)s ',
@@ -103,27 +103,10 @@ def scrape_offer_from_url(driver, url, db, log_to_console: bool = True):
 
     if log_to_console:
         offer.print_info()
+        print()
 
-    offer.add_to_db(db)
-    # print(f'Offer ID: {offer_id}',
-    #       f'Offer name: {hotel_name}',
-    #       f'Offer source: {url}',
-    #       f'Location: {location_info}',
-    #       f'Tourists count: {people_count}',
-    #       f'Description: {hotel_description[1]}',
-    #       f'Food info: {food_info.text}',
-    #       f'Nights count: {nights_count}',
-    #       f'Start Date: {date_interval_info_start.strftime("%d.%m.%Y")}',
-    #       f'End Date: {date_interval_info_end.strftime("%d.%m.%Y")}',
-    #       f'Transport: {transport_from_info.text}',
-    #       f'Price: {price_info}',
-    #
-    #       f'Images:',
-    #       sep='\n')
-    # print('\t')
-    # for e in images:
-    #     print(e)
-    # print()
+    # offer.add_to_db(db)
+    db.add_offer(offer)
 
 
 def get_offer_links(driver,
