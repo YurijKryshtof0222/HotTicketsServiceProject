@@ -2,6 +2,8 @@ import sqlite3
 
 from flask import jsonify
 
+from src.offer import Offer
+
 
 class DbController:
     __instance = None
@@ -124,7 +126,7 @@ class DbController:
                            INSERT INTO offer_links (link_id, offer_id, link)
                            VALUES (?, ?, ?);
                        '''
-            self.cursor.execute(insert_to_offer_links_sql, (None, offer_id, link))
+            self.cursor.execute(insert_to_offer_links_sql, (None, offer.offer_id, link))
             self.conn.commit()
 
     # select all record with pagination
@@ -153,3 +155,67 @@ class DbController:
 
     def close_connection(self):
         self.conn.close()
+
+    def get_offer(self, offer_id):
+        query = """
+            SELECT * FROM offer WHERE offer_id = ?
+        """
+
+        self.cursor.execute(query, (offer_id,))
+        row = self.cursor.fetchone()
+
+        query_links = '''
+                                           SELECT * FROM offer_links WHERE offer_id = ?;
+                                       '''
+        self.cursor.execute(query_links, (offer_id,))
+        links_row = self.cursor.fetchall()
+        links = []
+        for link in links_row:
+            links.append(link[2])
+
+        return Offer(
+            offer_id=row[1],
+            name=row[2],
+            source=row[3],
+            location=row[4],
+            people_count=row[5],
+            description=row[6],
+            food_info=row[7],
+            night_count=row[8],
+            start_date=row[9],
+            end_date=row[10],
+            transport_info=row[11],
+            price=row[12],
+            img_links=links
+        )
+
+    def update_offer(self, offer, id):
+        query = """
+            UPDATE offer
+            SET offer_name = ?,
+                offer_source = ?,
+                location = ?,
+                people_count = ?,
+                description = ?,
+                food_info = ?,
+                night_count = ?,
+                start_date = ?,
+                end_date = ?,
+                transport_info = ?,
+                price = ?
+            WHERE offer_id = ?
+        """
+        self.cursor.execute(query, (
+            offer.name,
+            offer.source,
+            offer.location,
+            offer.people_count,
+            offer.description,
+            offer.food_info,
+            offer.night_count,
+            offer.start_date,
+            offer.end_date,
+            offer.transport_info,
+            offer.price,
+
+            offer.offer_id))
