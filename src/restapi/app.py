@@ -1,4 +1,5 @@
 from datetime import datetime
+from re import split
 
 from flask import Flask, request, jsonify
 
@@ -16,18 +17,22 @@ def index():
 
 
 @app.route('/offers', methods=['GET'])
-@app.route('/offers/<where_conditions>', methods=['GET'])
-def get_offers(where_conditions=''):
+@app.route('/offers/<int:offer_id>', methods=['GET'])
+@app.route('/offers/<string:where_conditions>', methods=['GET'])
+def get_offers(offer_id=-1, where_conditions=''):
     page = int(request.args.get('page', 1))
     limit = int(request.args.get('limit', 10))
-    where_conditions = request.args.get('<where_conditions>', where_conditions)
-    return db.get_all_records_as_json(page, limit, where_conditions)
+    offer_id = request.args.get('<int:offer_id>', offer_id)
+    where_conditions = request.args.get('<str:where_conditions>', where_conditions)
+    return db.get_all_records_as_json(page, limit, offer_id, where_conditions)
 
 
 @app.route('/offers', methods=['POST'])
 def create_offer():
     # Отримуємо дані з тіла POST-запиту у форматі JSON
     data = request.form
+
+    comma_and_blank_regex = ' *, *'
 
     offer = Offer(
         offer_id=int(data['offer_id']),
@@ -42,12 +47,12 @@ def create_offer():
         end_date=datetime.strptime(data['end_date'], '%d.%m.%Y'),
         transport_info=data['transport_info'],
         price=int(data['price']),
-        img_links=data['img_links']
+        img_links=split(comma_and_blank_regex, data['img_links'])
     )
 
     db.add_offer(offer)
 
-    return jsonify({'message': 'Offer created successfully'}), 201
+    return jsonify({'message': 'Selected Offers created successfully'}), 201
 
 
 @app.route('/offers/<int:offer_id>', methods=['PUT'])
@@ -74,7 +79,18 @@ def update_offer(offer_id):
 
     db.update_offer(offer, id)  # Зберігаємо оновлений запис "offer" в базі даних
 
-    return jsonify({'message': 'Offer updated successfully'}), 200
+    return jsonify({'message': 'Selected Offers updated successfully'}), 200
+
+
+@app.route('/offers/<all>', methods=['DELETE'])
+@app.route('/offers/<int:offer_id>', methods=['DELETE'])
+@app.route('/offers/<string:where_conditions>', methods=['DELETE'])
+def delete_offer(where_conditions: str ='', offer_id: int=-1):
+    where_conditions = request.args.get('<str:where_conditions>', where_conditions)
+    offer_id = request.args.get('<int:offer_id>', offer_id)
+    db.delete_offer(where_conditions, offer_id)
+
+    return jsonify({'message': 'Selected offers deleted successfully'}), 200
 
 
 if __name__ == '__main__':
