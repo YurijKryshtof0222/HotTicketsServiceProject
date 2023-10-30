@@ -130,13 +130,19 @@ class DbController:
             self.conn.commit()
 
     # select all record with pagination
-    def get_all_records_as_json(self, page, limit, where=''):
+    def get_all_records_as_json(self, page, limit, offer_id=-1, where=''):
         # Calculate the offset based on the page and limit
         offset = (page - 1) * limit
 
         query = '''
                SELECT * FROM offer 
            '''
+
+        if offer_id >= 0:
+            query += f"""\nWHERE offer_id = {offer_id}
+                      ORDER BY uniq_id DESC LIMIT ? OFFSET ?
+                    """
+            return self.__convert_to_json(query, limit, offset)
 
         if where and where.strip():
             where_args = where.split('&')
@@ -188,6 +194,36 @@ class DbController:
             price=row[12],
             img_links=links
         )
+
+    def delete_offer(self, where_conditions: str = '', offer_id=-1):
+        query_links = '''
+                        DELETE FROM offer_links WHERE offer_id = ?;
+                    '''
+        self.cursor.execute(query_links, (offer_id,))
+
+        query = """
+            DELETE FROM offer  
+        """
+
+        if offer_id >= 0:
+            query += """
+                \n WHERE offer_id = ?
+                    """
+            self.cursor.execute(query, (offer_id,))
+            return
+
+        if where_conditions and where_conditions.strip():
+            where_args = where_conditions.split('&')
+            length = len(where_args)
+
+            query += " WHERE "
+            for i in range(length):
+                query += where_args[i]
+                if i != length - 1:
+                    query += " AND "
+
+        query += ";"
+        self.cursor.execute(query)
 
     def update_offer(self, offer, id):
         query = """
