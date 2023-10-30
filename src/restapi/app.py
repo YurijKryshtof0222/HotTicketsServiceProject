@@ -4,6 +4,8 @@ from flask import Flask, request, jsonify
 
 from db_controller import DbController
 from src.offer import Offer
+from re import split
+
 
 app = Flask(__name__)
 app.config['JSON_AS_ASCII'] = False
@@ -29,6 +31,8 @@ def create_offer():
     # Отримуємо дані з тіла POST-запиту у форматі JSON
     data = request.form
 
+    coma_and_blank_regex = r' *, *'
+
     offer = Offer(
         offer_id=int(data['offer_id']),
         name=data['name'],
@@ -42,9 +46,9 @@ def create_offer():
         end_date=datetime.strptime(data['end_date'], '%d.%m.%Y'),
         transport_info=data['transport_info'],
         price=int(data['price']),
-        img_links=data['img_links']
+        img_links=split(coma_and_blank_regex, data['img_links'])
     )
-
+    print(offer.print_info())
     db.add_offer(offer)
 
     return jsonify({'message': 'Offer created successfully'}), 201

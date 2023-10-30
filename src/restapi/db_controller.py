@@ -168,9 +168,9 @@ class DbController:
                                            SELECT * FROM offer_links WHERE offer_id = ?;
                                        '''
         self.cursor.execute(query_links, (offer_id,))
-        links_row = self.cursor.fetchall()
+        links_cols = self.cursor.fetchall()
         links = []
-        for link in links_row:
+        for link in links_cols:
             links.append(link[2])
 
         return Offer(
