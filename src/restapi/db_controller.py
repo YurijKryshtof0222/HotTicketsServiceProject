@@ -50,8 +50,8 @@ class DbController:
         self.cursor.execute(create_table_offer_links)
         self.conn.commit()
 
-    def __convert_to_json(self, query, limit, offset):
-        self.cursor.execute(query, (limit, offset))
+    def __convert_to_json(self, query):
+        self.cursor.execute(query)
         rows = self.cursor.fetchall()
 
         records = []
@@ -130,37 +130,52 @@ class DbController:
             self.conn.commit()
 
     # select all record with pagination
-    def get_all_records_as_json(self, page, limit, offer_id=-1, where=''):
+    def get_all_offers_as_json(self,
+                               page,
+                               limit,
+                               name,
+                               location,
+                               min_people_count,
+                               max_people_count,
+                               food_info,
+                               min_night_count,
+                               max_night_count,
+                               start_date,
+                               end_date,
+                               transport_info,
+                               min_price,
+                               max_price):
         # Calculate the offset based on the page and limit
         offset = (page - 1) * limit
 
-        query = '''
-               SELECT * FROM offer 
-           '''
+        query = f"""
+               SELECT * FROM offer
+               WHERE offer_name LIKE '{name}%'
+                 AND location LIKE '{location}%'
+                 AND people_count BETWEEN {min_people_count} AND {max_people_count}
+                 AND food_info LIKE '{food_info}%'
+                 AND night_count BETWEEN {min_night_count} AND {max_night_count}
+                 AND transport_info LIKE '{transport_info}%'
+                 AND price BETWEEN {min_price} AND {max_price}
+           """
 
-        if offer_id >= 0:
-            query += f"""\nWHERE offer_id = {offer_id}
-                      ORDER BY uniq_id DESC LIMIT ? OFFSET ?
-                    """
-            return self.__convert_to_json(query, limit, offset)
+        if start_date and start_date.split():
+            query += f" AND start_date LIKE '{start_date}%'"
+        if end_date and end_date.split():
+            query += f" AND end_date LIKE '{end_date}%'"
 
-        if where and where.strip():
-            where_args = where.split('&')
-            length = len(where_args)
+        query += f" ORDER BY uniq_id LIMIT {limit} OFFSET {offset}"
+        print(query)
+        return self.__convert_to_json(query)
 
-            query += "WHERE "
-            for i in range(length):
-                query += where_args[i]
-                if i != length - 1:
-                    query += " AND "
+    def get_offer_as_json(self, offer_id):
+        query = f'''
+            SELECT * FROM offer 
+            WHERE offer_id = {offer_id}
+            ORDER BY uniq_id DESC 
+        '''
 
-        query += """
-            \nORDER BY uniq_id DESC LIMIT ? OFFSET ?
-        """
-        return self.__convert_to_json(query, limit, offset)
-
-    def close_connection(self):
-        self.conn.close()
+        return self.__convert_to_json(query)
 
     def get_offer(self, offer_id):
         query = """
@@ -195,35 +210,65 @@ class DbController:
             img_links=links
         )
 
-    def delete_offer(self, where_conditions: str = '', offer_id=-1):
-        query_links = '''
-                        DELETE FROM offer_links WHERE offer_id = ?;
-                    '''
-        self.cursor.execute(query_links, (offer_id,))
-
-        query = """
-            DELETE FROM offer  
+    def delete_offers(self,
+                      name,
+                      location,
+                      min_people_count,
+                      max_people_count,
+                      food_info,
+                      min_night_count,
+                      max_night_count,
+                      start_date,
+                      end_date,
+                      transport_info,
+                      min_price,
+                      max_price
+                      ):
+        query_to_retrive = f"""
+            SELECT offer_id FROM offer
+            WHERE offer_name LIKE '{name}%' 
+                        AND location LIKE '{location}%' 
+                        AND people_count BETWEEN {min_people_count} AND {max_people_count} 
+                        AND food_info LIKE '{food_info}%' 
+                        AND night_count BETWEEN {min_night_count} AND {max_night_count} 
+                        AND transport_info LIKE '{transport_info}%'    
+                        AND price BETWEEN {min_price} AND {max_price} 
         """
+        self.cursor.execute(query_to_retrive)
+        id_list = self.cursor.fetchall()
 
-        if offer_id >= 0:
-            query += """
-                \n WHERE offer_id = ?
-                    """
-            self.cursor.execute(query, (offer_id,))
-            return
+        query = f"""
+                      DELETE FROM offer 
+                      WHERE offer_name LIKE '{name}%' 
+                        AND location LIKE '{location}%' 
+                        AND people_count BETWEEN {min_people_count} AND {max_people_count} 
+                        AND food_info LIKE '{food_info}%' 
+                        AND night_count BETWEEN {min_night_count} AND {max_night_count} 
+                        AND transport_info LIKE '{transport_info}%'    
+                        AND price BETWEEN {min_price} AND {max_price} 
+                  """
 
-        if where_conditions and where_conditions.strip():
-            where_args = where_conditions.split('&')
-            length = len(where_args)
-
-            query += " WHERE "
-            for i in range(length):
-                query += where_args[i]
-                if i != length - 1:
-                    query += " AND "
-
-        query += ";"
+        if start_date and start_date.split():
+            query += f" AND start_date LIKE '{start_date}%'"
+        if end_date and end_date.split():
+            query += f" AND end_date LIKE '{end_date}%'"
         self.cursor.execute(query)
+
+        for offer_id in id_list:
+            query_links = '''
+                            DELETE FROM offer_links WHERE offer_id = ?;
+                        '''
+            self.cursor.execute(query_links, (offer_id,))
+
+    def delete_offer(self, offer_id):
+        query = f'''
+                    DELETE FROM offer WHERE offer_id = ?
+                '''
+        query_links = '''
+                                    DELETE FROM offer_links WHERE offer_id = ?;
+                                '''
+        self.cursor.execute(query, (offer_id,))
+        self.cursor.execute(query_links, (offer_id,))
 
     def update_offer(self, offer, id):
         query = """
@@ -255,3 +300,6 @@ class DbController:
             offer.price,
 
             offer.offer_id))
+
+    def close_connection(self):
+        self.conn.close()
