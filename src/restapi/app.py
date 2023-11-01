@@ -119,9 +119,6 @@ def delete_offer(offer_id):
 
 @app.route('/offers', methods=['DELETE'])
 def delete_offers():
-    page = int(request.args.get('page', 1))
-    limit = int(request.args.get('limit', 10))
-
     name = str(request.args.get('name', ''))
     location = str(request.args.get('location', ''))
     min_people_count = int(request.args.get('limit', 1))
