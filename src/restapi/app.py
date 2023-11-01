@@ -7,7 +7,7 @@ from db_controller import DbController
 from src.offer import Offer
 
 app = Flask(__name__)
-app.config['JSON_AS_ASCII'] = False
+# app.config['JSON_AS_ASCII'] = False
 db = DbController("../my_database.db")
 
 
@@ -17,14 +17,42 @@ def index():
 
 
 @app.route('/offers', methods=['GET'])
-@app.route('/offers/<int:offer_id>', methods=['GET'])
-@app.route('/offers/<string:where_conditions>', methods=['GET'])
-def get_offers(offer_id=-1, where_conditions=''):
+def get_offers():
     page = int(request.args.get('page', 1))
     limit = int(request.args.get('limit', 10))
-    offer_id = request.args.get('<int:offer_id>', offer_id)
-    where_conditions = request.args.get('<str:where_conditions>', where_conditions)
-    return db.get_all_records_as_json(page, limit, offer_id, where_conditions)
+
+    name = str(request.args.get('name', ''))
+    location = str(request.args.get('location', ''))
+    min_people_count = int(request.args.get('min_people_count', 1))
+    max_people_count = int(request.args.get('max_people_count', 10))
+    food_info = str(request.args.get('food_info', ''))
+    min_night_count = int(request.args.get('min_night_count', 1))
+    max_night_count = int(request.args.get('max_night_count', 12))
+    start_date = str(request.args.get('start_date', ''))
+    end_date = str(request.args.get('end_date', ''))
+    transport_info = request.args.get('transport_info', '')
+    min_price = int(request.args.get('min_price', 0))
+    max_price = int(request.args.get('max_price', 9999999))
+
+    return db.get_all_offers_as_json(page,
+                                     limit,
+                                     name,
+                                     location,
+                                     min_people_count,
+                                     max_people_count,
+                                     food_info,
+                                     min_night_count,
+                                     max_night_count,
+                                     start_date,
+                                     end_date,
+                                     transport_info,
+                                     min_price,
+                                     max_price)
+
+
+@app.route('/offer/<int:offer_id>', methods=['GET'])
+def get_offer(offer_id):
+    return db.get_offer_as_json(offer_id)
 
 
 @app.route('/offers', methods=['POST'])
@@ -82,13 +110,43 @@ def update_offer(offer_id):
     return jsonify({'message': 'Selected Offers updated successfully'}), 200
 
 
-@app.route('/offers/<all>', methods=['DELETE'])
-@app.route('/offers/<int:offer_id>', methods=['DELETE'])
-@app.route('/offers/<string:where_conditions>', methods=['DELETE'])
-def delete_offer(where_conditions: str ='', offer_id: int=-1):
-    where_conditions = request.args.get('<str:where_conditions>', where_conditions)
-    offer_id = request.args.get('<int:offer_id>', offer_id)
-    db.delete_offer(where_conditions, offer_id)
+@app.route('/offer/<int:offer_id>', methods=['DELETE'])
+def delete_offer(offer_id):
+    db.delete_offer(offer_id)
+
+    return jsonify({'message': 'Selected Offer deleted successfully'}), 200
+
+
+@app.route('/offers', methods=['DELETE'])
+def delete_offers():
+    page = int(request.args.get('page', 1))
+    limit = int(request.args.get('limit', 10))
+
+    name = str(request.args.get('name', ''))
+    location = str(request.args.get('location', ''))
+    min_people_count = int(request.args.get('limit', 1))
+    max_people_count = int(request.args.get('limit', 10))
+    food_info = str(request.args.get('food_info', ''))
+    min_night_count = int(request.args.get('min_night_count', 1))
+    max_night_count = int(request.args.get('max_night_count', 12))
+    start_date = str(request.args.get('start_date', ''))
+    end_date = str(request.args.get('end_date', ''))
+    transport_info = request.args.get('transport_info', '')
+    min_price = int(request.args.get('min_price', 0))
+    max_price = int(request.args.get('max_price', 9999999))
+
+    delete_offers(name,
+                  location,
+                  min_people_count,
+                  max_people_count,
+                  food_info,
+                  min_night_count,
+                  max_night_count,
+                  start_date,
+                  end_date,
+                  transport_info,
+                  min_price,
+                  max_price)
 
     return jsonify({'message': 'Selected offers deleted successfully'}), 200
 
