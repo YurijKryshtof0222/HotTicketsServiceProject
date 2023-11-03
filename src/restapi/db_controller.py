@@ -165,7 +165,7 @@ class DbController:
             query += f" AND end_date LIKE '{end_date}%'"
 
         query += f" ORDER BY uniq_id LIMIT {limit} OFFSET {offset}"
-        print(query)
+
         return self.__convert_to_json(query)
 
     def get_offer_as_json(self, offer_id):

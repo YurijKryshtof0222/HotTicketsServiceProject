@@ -16,6 +16,11 @@ def index():
     return 'Hello'
 
 
+@app.route('/offer/<int:offer_id>', methods=['GET'])
+def get_offer(offer_id):
+    return db.get_offer_as_json(offer_id)
+
+
 @app.route('/offers', methods=['GET'])
 def get_offers():
     page = int(request.args.get('page', 1))
@@ -50,12 +55,7 @@ def get_offers():
                                      max_price)
 
 
-@app.route('/offer/<int:offer_id>', methods=['GET'])
-def get_offer(offer_id):
-    return db.get_offer_as_json(offer_id)
-
-
-@app.route('/offers', methods=['POST'])
+@app.route('/offer', methods=['POST'])
 def create_offer():
     # Отримуємо дані з тіла POST-запиту у форматі JSON
     data = request.form
@@ -80,7 +80,32 @@ def create_offer():
 
     db.add_offer(offer)
 
-    return jsonify({'message': 'Selected Offers created successfully'}), 201
+    return jsonify({'message': 'Offer created successfully'}), 201
+
+
+@app.route('/offers', methods=['POST'])
+def create_offers():
+    # Get data from the request body in JSON format
+    data = request.get_json()
+    comma_and_blank_regex = ' *, *'
+    for entry in data:
+        offer = Offer(
+            offer_id=int(entry['offer_id']),
+            name=entry['name'],
+            source=entry['source'],
+            location=entry['location'],
+            people_count=int(entry['people_count']),
+            description=entry['description'],
+            food_info=entry['food_info'],
+            night_count=int(entry['night_count']),
+            start_date=datetime.strptime(entry['start_date'], '%d.%m.%Y'),
+            end_date=datetime.strptime(entry['end_date'], '%d.%m.%Y'),
+            transport_info=entry['transport_info'],
+            price=int(entry['price']),
+            img_links=split(comma_and_blank_regex, entry['img_links'])
+        )
+        db.add_offer(offer)
+    return jsonify({'message': ' Offers created successfully'}), 201
 
 
 @app.route('/offers/<int:offer_id>', methods=['PUT'])
