@@ -129,8 +129,19 @@ def get_offer_links(driver,
     find_button_element = filter_element.find_element(By.TAG_NAME, 'button')
     action_chain.click(select_duration).click(find_button_element).perform()
 
-    time.sleep(15)
+    time.sleep(4)
+    no_results_msg_element = driver.find_elements(By.CLASS_NAME, 'src-components-result'
+                                                         '-SearchNothingFound-styles__root')
+    if no_results_msg_element:
+        return set()
 
+    time.sleep(4)
+    no_results_msg_element = driver.find_elements(By.CLASS_NAME, 'src-components-result'
+                                                                 '-SearchNothingFound-styles__root')
+    if no_results_msg_element:
+        return set()
+
+    time.sleep(4)
     no_results_msg_element = driver.find_elements(By.CLASS_NAME, 'src-components-result'
                                                                  '-SearchNothingFound-styles__root')
     if no_results_msg_element:
