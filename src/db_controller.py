@@ -1,8 +1,8 @@
 import sqlite3
+import sys
 
 from flask import jsonify
-
-from src.offer import Offer
+from offer import Offer
 
 
 class DbController:

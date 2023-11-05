@@ -1,10 +1,9 @@
 from datetime import datetime
-from re import split
 
 from flask import Flask, request, jsonify
 
 from db_controller import DbController
-from src.offer import Offer
+from offer import Offer
 
 app = Flask(__name__)
 # app.config['JSON_AS_ASCII'] = False

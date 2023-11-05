@@ -4,9 +4,7 @@ import time
 import search_container
 from selenium import webdriver
 from selenium.webdriver import ActionChains
-from src.restapi import db_controller
-
-from concurrent.futures import ThreadPoolExecutor
+from src import db_controller
 
 from src.scrapper.scrapper_controler import ScrapperController
 
