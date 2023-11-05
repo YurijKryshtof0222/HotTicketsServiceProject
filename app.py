@@ -7,7 +7,7 @@ from src.offer import Offer
 
 app = Flask(__name__)
 # app.config['JSON_AS_ASCII'] = False
-db = DbController("../my_database.db")
+db = DbController("src/my_database.db")
 
 
 @app.route('/')
@@ -24,7 +24,6 @@ def get_offer(offer_id):
 def get_offers():
     page = int(request.args.get('page', 1))
     limit = int(request.args.get('limit', 10))
-    #...
     min_offer_id = int(request.args.get('min_offer_id', 0))
     max_offer_id = int(request.args.get('max_offer_id', 9999999999))
     name = str(request.args.get('name', ''))
@@ -62,7 +61,6 @@ def get_offers():
 def create_offer():
     # Отримуємо дані з тіла POST-запиту у форматі JSON
     data = request.get_json()
-    #...
     comma_and_blank_regex = ' *, *'
 
     offer = Offer(
