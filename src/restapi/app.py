@@ -3,7 +3,7 @@ from re import split
 
 from flask import Flask, request, jsonify
 
-from src.restapi.db_controller import DbController
+from db_controller import DbController
 from src.offer import Offer
 
 app = Flask(__name__)
