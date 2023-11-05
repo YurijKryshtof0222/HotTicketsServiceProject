@@ -2,8 +2,8 @@ from datetime import datetime
 
 from flask import Flask, request, jsonify
 
-from db_controller import DbController
-from offer import Offer
+from src.db_controller import DbController
+from src.offer import Offer
 
 app = Flask(__name__)
 # app.config['JSON_AS_ASCII'] = False
@@ -180,5 +180,5 @@ def delete_offers():
     return jsonify({'message': 'Selected offers deleted successfully'}), 200
 
 
-if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000)
+# if __name__ == '__main__':
+#     app.run()
