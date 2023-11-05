@@ -7,7 +7,7 @@ from src.offer import Offer
 
 app = Flask(__name__)
 # app.config['JSON_AS_ASCII'] = False
-db = DbController("../my_database.db")
+db = DbController("src/my_database.db")
 
 
 @app.route('/')
