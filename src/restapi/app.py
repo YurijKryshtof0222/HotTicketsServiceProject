@@ -1,5 +1,4 @@
 from datetime import datetime
-from re import split
 
 from flask import Flask, request, jsonify
 
@@ -182,4 +181,4 @@ def delete_offers():
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run()
