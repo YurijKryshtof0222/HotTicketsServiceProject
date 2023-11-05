@@ -13,14 +13,21 @@ db = DbController("../my_database.db")
 
 @app.route('/')
 def index():
-    return 'Hello'
+    return '<h1>Hello</h1>'
+
+
+@app.route('/offer/<int:offer_id>', methods=['GET'])
+def get_offer(offer_id):
+    return db.get_offer_as_json(offer_id)
 
 
 @app.route('/offers', methods=['GET'])
 def get_offers():
     page = int(request.args.get('page', 1))
     limit = int(request.args.get('limit', 10))
-
+    #...
+    min_offer_id = int(request.args.get('min_offer_id', 0))
+    max_offer_id = int(request.args.get('max_offer_id', 9999999999))
     name = str(request.args.get('name', ''))
     location = str(request.args.get('location', ''))
     min_people_count = int(request.args.get('min_people_count', 1))
@@ -32,34 +39,31 @@ def get_offers():
     end_date = str(request.args.get('end_date', ''))
     transport_info = request.args.get('transport_info', '')
     min_price = int(request.args.get('min_price', 0))
-    max_price = int(request.args.get('max_price', 9999999))
+    max_price = int(request.args.get('max_price', 999999999))
 
     return db.get_all_offers_as_json(page,
-                                     limit,
-                                     name,
-                                     location,
-                                     min_people_count,
-                                     max_people_count,
-                                     food_info,
-                                     min_night_count,
-                                     max_night_count,
-                                     start_date,
-                                     end_date,
-                                     transport_info,
-                                     min_price,
-                                     max_price)
+                                     limit=limit,
+                                     name=name,
+                                     min_offer_id=min_offer_id,
+                                     max_offer_id=max_offer_id,
+                                     location=location,
+                                     min_people_count=min_people_count,
+                                     max_people_count=max_people_count,
+                                     food_info=food_info,
+                                     min_night_count=min_night_count,
+                                     max_night_count=max_night_count,
+                                     start_date=start_date,
+                                     end_date=end_date,
+                                     transport_info=transport_info,
+                                     min_price=min_price,
+                                     max_price=max_price)
 
 
-@app.route('/offer/<int:offer_id>', methods=['GET'])
-def get_offer(offer_id):
-    return db.get_offer_as_json(offer_id)
-
-
-@app.route('/offers', methods=['POST'])
+@app.route('/offer', methods=['POST'])
 def create_offer():
     # Отримуємо дані з тіла POST-запиту у форматі JSON
-    data = request.form
-
+    data = request.get_json()
+    #...
     comma_and_blank_regex = ' *, *'
 
     offer = Offer(
@@ -75,18 +79,43 @@ def create_offer():
         end_date=datetime.strptime(data['end_date'], '%d.%m.%Y'),
         transport_info=data['transport_info'],
         price=int(data['price']),
-        img_links=split(comma_and_blank_regex, data['img_links'])
+        img_links=data['img_links']
     )
 
     db.add_offer(offer)
 
-    return jsonify({'message': 'Selected Offers created successfully'}), 201
+    return jsonify({'message': 'Offer created successfully'}), 201
+
+
+@app.route('/offers', methods=['POST'])
+def create_offers():
+    # Get data from the request body in JSON format
+    data = request.get_json()
+    comma_and_blank_regex = ' *, *'
+    for entry in data:
+        offer = Offer(
+            offer_id=int(entry['offer_id']),
+            name=entry['name'],
+            source=entry['source'],
+            location=entry['location'],
+            people_count=int(entry['people_count']),
+            description=entry['description'],
+            food_info=entry['food_info'],
+            night_count=int(entry['night_count']),
+            start_date=datetime.strptime(entry['start_date'], '%d.%m.%Y'),
+            end_date=datetime.strptime(entry['end_date'], '%d.%m.%Y'),
+            transport_info=entry['transport_info'],
+            price=int(entry['price']),
+            img_links=entry['img_links']
+        )
+        db.add_offer(offer)
+    return jsonify({'message': ' Offers created successfully'}), 201
 
 
 @app.route('/offers/<int:offer_id>', methods=['PUT'])
 def update_offer(offer_id):
     data = request.form
-    offer = db.get_offer(offer_id)
+    offer = request.args.get(db.get_offer(offer_id))
 
     if offer is None:
         return jsonify({'error': 'Offer not found'}), 404
@@ -119,31 +148,35 @@ def delete_offer(offer_id):
 
 @app.route('/offers', methods=['DELETE'])
 def delete_offers():
-    name = str(request.args.get('name', ''))
-    location = str(request.args.get('location', ''))
-    min_people_count = int(request.args.get('limit', 1))
-    max_people_count = int(request.args.get('limit', 10))
-    food_info = str(request.args.get('food_info', ''))
-    min_night_count = int(request.args.get('min_night_count', 1))
-    max_night_count = int(request.args.get('max_night_count', 12))
-    start_date = str(request.args.get('start_date', ''))
-    end_date = str(request.args.get('end_date', ''))
-    transport_info = request.args.get('transport_info', '')
-    min_price = int(request.args.get('min_price', 0))
-    max_price = int(request.args.get('max_price', 9999999))
+    min_offer_id = int(request.args.get('min_offer_id')) if request.args.get('min_offer_id') else None
+    max_offer_id = int(request.args.get('max_offer_id')) if request.args.get('max_offer_id') else None
+    name = request.args.get('name')
+    location = request.args.get('location')
+    min_people_count = int(request.args.get('min_people_count')) if request.args.get('min_people_count') else None
+    max_people_count = int(request.args.get('min_people_count')) if request.args.get('min_people_count') else None
+    food_info = request.args.get('food_info')
+    min_night_count = int(request.args.get('min_night_count')) if request.args.get('min_night_count') else None
+    max_night_count = int(request.args.get('max_night_count')) if request.args.get('max_night_count') else None
+    start_date = request.args.get('start_date')
+    end_date = request.args.get('end_date')
+    transport_info = request.args.get('transport_info')
+    min_price = int(request.args.get('min_price')) if request.args.get('min_price') else None
+    max_price = int(request.args.get('max_price')) if request.args.get('max_price') else None
 
-    delete_offers(name,
-                  location,
-                  min_people_count,
-                  max_people_count,
-                  food_info,
-                  min_night_count,
-                  max_night_count,
-                  start_date,
-                  end_date,
-                  transport_info,
-                  min_price,
-                  max_price)
+    db.delete_offers(min_offer_id,
+                     max_offer_id,
+                     name,
+                     location,
+                     min_people_count,
+                     max_people_count,
+                     food_info,
+                     min_night_count,
+                     max_night_count,
+                     start_date,
+                     end_date,
+                     transport_info,
+                     min_price,
+                     max_price)
 
     return jsonify({'message': 'Selected offers deleted successfully'}), 200
 

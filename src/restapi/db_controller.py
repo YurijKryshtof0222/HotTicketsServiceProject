@@ -134,6 +134,8 @@ class DbController:
                                page,
                                limit,
                                name,
+                               min_offer_id,
+                               max_offer_id,
                                location,
                                min_people_count,
                                max_people_count,
@@ -159,13 +161,20 @@ class DbController:
                  AND price BETWEEN {min_price} AND {max_price}
            """
 
+        if min_offer_id >= 0:
+            query += f" AND offer_id >= {min_offer_id}"
+        if max_offer_id >= 0:
+            query += f" AND offer_id <= {max_offer_id}"
+
         if start_date and start_date.split():
             query += f" AND start_date LIKE '{start_date}%'"
         if end_date and end_date.split():
             query += f" AND end_date LIKE '{end_date}%'"
 
         query += f" ORDER BY uniq_id LIMIT {limit} OFFSET {offset}"
+
         print(query)
+
         return self.__convert_to_json(query)
 
     def get_offer_as_json(self, offer_id):
@@ -211,6 +220,8 @@ class DbController:
         )
 
     def delete_offers(self,
+                      min_offer_id,
+                      max_offer_id,
                       name,
                       location,
                       min_people_count,
@@ -224,53 +235,75 @@ class DbController:
                       min_price,
                       max_price
                       ):
-        query_to_retrive = f"""
+
+        query_to_select = """
             SELECT offer_id FROM offer
-            WHERE offer_name LIKE '{name}%' 
-                        AND location LIKE '{location}%' 
-                        AND people_count BETWEEN {min_people_count} AND {max_people_count} 
-                        AND food_info LIKE '{food_info}%' 
-                        AND night_count BETWEEN {min_night_count} AND {max_night_count} 
-                        AND transport_info LIKE '{transport_info}%'    
-                        AND price BETWEEN {min_price} AND {max_price} 
+            WHERE 1=1
         """
-        self.cursor.execute(query_to_retrive)
+        where_conditions = ""
+
+        query_params = []
+
+        if min_offer_id is not None:
+            where_conditions += " AND offer_id >= ?"
+            query_params.append(min_offer_id)
+        if max_offer_id is not None:
+            where_conditions += " AND offer_id <= ?"
+            query_params.append(max_offer_id)
+        if name is not None:
+            where_conditions += " AND offer_name LIKE ?"
+            query_params.append(f"{name}%")
+        if location is not None:
+            where_conditions += " AND location LIKE ?"
+            query_params.append(f"{location}%")
+        if min_people_count is not None:
+            where_conditions += " AND people_count >= ?"
+            query_params.append(min_people_count)
+        if max_people_count is not None:
+            where_conditions += " AND people_count <= ?"
+            query_params.append(max_people_count)
+        if food_info is not None:
+            where_conditions += " AND food_info LIKE ?"
+            query_params.append(f"{food_info}%")
+        if min_night_count is not None:
+            where_conditions += " AND night_count >= ?"
+            query_params.append(min_night_count)
+        if max_night_count is not None:
+            where_conditions += " AND night_count <= ?"
+            query_params.append(max_night_count)
+        if transport_info is not None:
+            where_conditions += " AND transport_info LIKE ?"
+            query_params.append(f"{transport_info}%")
+        if min_price is not None:
+            where_conditions += " AND price >= ?"
+            query_params.append(min_price)
+        if max_price is not None:
+            where_conditions += " AND price <= ?"
+            query_params.append(max_price)
+        if start_date is not None and start_date.strip():
+            where_conditions += " AND start_date LIKE ?"
+            query_params.append(f"{start_date}%")
+        if end_date is not None and end_date.strip():
+            where_conditions += " AND end_date LIKE ?"
+            query_params.append(f"{end_date}%")
+
+        query_to_select += where_conditions
+        self.cursor.execute(query_to_select, query_params)
         id_list = self.cursor.fetchall()
 
-        query = f"""
-                      DELETE FROM offer 
-                      WHERE offer_name LIKE '{name}%' 
-                        AND location LIKE '{location}%' 
-                        AND people_count BETWEEN {min_people_count} AND {max_people_count} 
-                        AND food_info LIKE '{food_info}%' 
-                        AND night_count BETWEEN {min_night_count} AND {max_night_count} 
-                        AND transport_info LIKE '{transport_info}%'    
-                        AND price BETWEEN {min_price} AND {max_price} 
-                  """
+        query = """
+            DELETE FROM offer
+            WHERE 1=1
+        """
 
-        if start_date and start_date.split():
-            query += f" AND start_date LIKE '{start_date}%'"
-        if end_date and end_date.split():
-            query += f" AND end_date LIKE '{end_date}%'"
-        self.cursor.execute(query)
+        query += where_conditions
+        self.cursor.execute(query, query_params)
 
         for offer_id in id_list:
-            query_links = '''
-                            DELETE FROM offer_links WHERE offer_id = ?;
-                        '''
-            self.cursor.execute(query_links, (offer_id,))
+            query_links = "DELETE FROM offer_links WHERE offer_id = ?"
+            self.cursor.execute(query_links, (offer_id[0],))
 
-    def delete_offer(self, offer_id):
-        query = f'''
-                    DELETE FROM offer WHERE offer_id = ?
-                '''
-        query_links = '''
-                                    DELETE FROM offer_links WHERE offer_id = ?;
-                                '''
-        self.cursor.execute(query, (offer_id,))
-        self.cursor.execute(query_links, (offer_id,))
-
-    def update_offer(self, offer, id):
+    def update_offer(self, offer):
         query = """
             UPDATE offer
             SET offer_name = ?,
@@ -300,6 +333,19 @@ class DbController:
             offer.price,
 
             offer.offer_id))
+
+    def delete_offer(self, offer_id):
+        query = """
+                    DELETE FROM offer
+                    WHERE offer_id = ?
+                """
+        self.cursor.execute(query, (offer_id,))
+
+        query = """
+                    DELETE FROM offer_links
+                    WHERE offer_id = ?
+                """
+        self.cursor.execute(query, (offer_id,))
 
     def close_connection(self):
         self.conn.close()
