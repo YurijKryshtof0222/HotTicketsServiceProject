@@ -13,5 +13,5 @@
 
 <p float="left">
   <img src="https://github.com/YurijKryshtof0222/HotTicketsServiceProject/assets/105464154/112fa0c9-1ddd-4ab1-a27d-60dfce9d04b8" width="300" height="500">
-  <img src="https://github.com/YurijKryshtof0222/HotTicketsServiceProject/assets/105464154/09e571f3-3b1c-4218-b39f-87f980201504" width="600" height="500">
+  <img src="https://github.com/YurijKryshtof0222/HotTicketsServiceProject/assets/105464154/09e571f3-3b1c-4218-b39f-87f980201504" width="500" height="500">
 </p>
