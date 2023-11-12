@@ -303,7 +303,7 @@ class DbController:
             query_links = "DELETE FROM offer_links WHERE offer_id = ?"
             self.cursor.execute(query_links, (offer_id[0],))
 
-    def update_offer(self, offer):
+    def update_offer(self, offer_id, offer):
         query = """
             UPDATE offer
             SET offer_name = ?,
@@ -332,7 +332,7 @@ class DbController:
             offer.transport_info,
             offer.price,
 
-            offer.offer_id))
+            offer_id))
 
     def delete_offer(self, offer_id):
         query = """

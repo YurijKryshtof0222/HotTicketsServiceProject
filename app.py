@@ -57,7 +57,47 @@ def get_offers():
                                      max_price=max_price)
 
 
-@app.route('/offer', methods=['POST'])
+@app.route('/offers', methods=['POST'])
+def get_offers_filter_by_json():
+    data = request.get_json()
+
+    page = int(request.args.get('page', 1))
+    limit = int(request.args.get('limit', 10))
+
+    min_offer_id = int(data.get('min_offer_id', 0))
+    max_offer_id = int(data.get('max_offer_id', 9999999999))
+    name = str(data.get('name', ''))
+    location = str(data.get('location', ''))
+    min_people_count = int(data.get('min_people_count', 1))
+    max_people_count = int(data.get('max_people_count', 10))
+    food_info = str(data.get('food_info', ''))
+    min_night_count = int(data.get('min_night_count', 1))
+    max_night_count = int(data.get('max_night_count', 12))
+    start_date = str(data.get('start_date', ''))
+    end_date = str(data.get('end_date', ''))
+    transport_info = data.get('transport_info', '')
+    min_price = int(data.get('min_price', 0))
+    max_price = int(data.get('max_price', 999999999))
+
+    return db.get_all_offers_as_json(page,
+                                     limit=limit,
+                                     name=name,
+                                     min_offer_id=min_offer_id,
+                                     max_offer_id=max_offer_id,
+                                     location=location,
+                                     min_people_count=min_people_count,
+                                     max_people_count=max_people_count,
+                                     food_info=food_info,
+                                     min_night_count=min_night_count,
+                                     max_night_count=max_night_count,
+                                     start_date=start_date,
+                                     end_date=end_date,
+                                     transport_info=transport_info,
+                                     min_price=min_price,
+                                     max_price=max_price)
+
+
+@app.route('/offer/create', methods=['POST'])
 def create_offer():
     # Отримуємо дані з тіла POST-запиту у форматі JSON
     data = request.get_json()
@@ -84,7 +124,7 @@ def create_offer():
     return jsonify({'message': 'Offer created successfully'}), 201
 
 
-@app.route('/offers', methods=['POST'])
+@app.route('/offers/create', methods=['POST'])
 def create_offers():
     # Get data from the request body in JSON format
     data = request.get_json()
@@ -109,7 +149,7 @@ def create_offers():
     return jsonify({'message': ' Offers created successfully'}), 201
 
 
-@app.route('/offers/<int:offer_id>', methods=['PUT'])
+@app.route('/offers/update/<int:offer_id>', methods=['PUT'])
 def update_offer(offer_id):
     data = request.form
     offer = request.args.get(db.get_offer(offer_id))
@@ -131,19 +171,19 @@ def update_offer(offer_id):
     offer.price = data.get('price', offer.price)
     offer.img_links = data.get('img_links', offer.img_links)
 
-    db.update_offer(offer, id)  # Зберігаємо оновлений запис "offer" в базі даних
+    db.update_offer(offer_id, offer)  # Зберігаємо оновлений запис "offer" в базі даних
 
     return jsonify({'message': 'Selected Offers updated successfully'}), 200
 
 
-@app.route('/offer/<int:offer_id>', methods=['DELETE'])
+@app.route('/offer/delete/<int:offer_id>', methods=['DELETE'])
 def delete_offer(offer_id):
     db.delete_offer(offer_id)
 
     return jsonify({'message': 'Selected Offer deleted successfully'}), 200
 
 
-@app.route('/offers', methods=['DELETE'])
+@app.route('/offers/delete', methods=['DELETE'])
 def delete_offers():
     min_offer_id = int(request.args.get('min_offer_id')) if request.args.get('min_offer_id') else None
     max_offer_id = int(request.args.get('max_offer_id')) if request.args.get('max_offer_id') else None
@@ -178,5 +218,5 @@ def delete_offers():
     return jsonify({'message': 'Selected offers deleted successfully'}), 200
 
 
-# if __name__ == '__main__':
-#     app.run()
+if __name__ == '__main__':
+    app.run()
