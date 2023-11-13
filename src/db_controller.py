@@ -173,8 +173,6 @@ class DbController:
 
         query += f" ORDER BY uniq_id LIMIT {limit} OFFSET {offset}"
 
-        print(query)
-
         return self.__convert_to_json(query)
 
     def get_offer_as_json(self, offer_id):
@@ -229,7 +227,10 @@ class DbController:
                       food_info,
                       min_night_count,
                       max_night_count,
-                      start_date,
+                      min_start_date,
+                      max_start_date,
+                      min_end_date,
+                      max_end_date,
                       end_date,
                       transport_info,
                       min_price,
@@ -280,11 +281,19 @@ class DbController:
         if max_price is not None:
             where_conditions += " AND price <= ?"
             query_params.append(max_price)
-        if start_date is not None and start_date.strip():
-            where_conditions += " AND start_date LIKE ?"
-            query_params.append(f"{start_date}%")
+
+        if min_start_date is not None and min_start_date.strip():
+            where_conditions += " AND start_date >="
+            query_params.append(f"{min_start_date}%")
+        if min_start_date is not None and min_start_date.strip():
+            where_conditions += " AND start_date <="
+            query_params.append(f"{min_start_date}%")
+
         if end_date is not None and end_date.strip():
-            where_conditions += " AND end_date LIKE ?"
+            where_conditions += " AND end_date >="
+            query_params.append(f"{end_date}%")
+        if end_date is not None and end_date.strip():
+            where_conditions += " AND end_date <="
             query_params.append(f"{end_date}%")
 
         query_to_select += where_conditions

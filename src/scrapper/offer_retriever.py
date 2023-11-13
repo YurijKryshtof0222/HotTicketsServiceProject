@@ -105,7 +105,6 @@ def scrape_offer_from_url(driver, url, db, log_to_console: bool = True):
         offer.print_info()
         print()
 
-    # offer.add_to_db(db)
     db.add_offer(offer)
 
 

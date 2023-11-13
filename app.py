@@ -112,8 +112,8 @@ def create_offer():
         description=data['description'],
         food_info=data['food_info'],
         night_count=int(data['night_count']),
-        start_date=datetime.strptime(data['start_date'], '%d.%m.%Y'),
-        end_date=datetime.strptime(data['end_date'], '%d.%m.%Y'),
+        start_date=datetime.strptime(data['start_date'], '%d-%m-%Y'),
+        end_date=datetime.strptime(data['end_date'], '%d-%m-%Y'),
         transport_info=data['transport_info'],
         price=int(data['price']),
         img_links=data['img_links']
@@ -139,8 +139,8 @@ def create_offers():
             description=entry['description'],
             food_info=entry['food_info'],
             night_count=int(entry['night_count']),
-            start_date=datetime.strptime(entry['start_date'], '%d.%m.%Y'),
-            end_date=datetime.strptime(entry['end_date'], '%d.%m.%Y'),
+            start_date=datetime.strptime(entry['start_date'], '%d-%m-%Y'),
+            end_date=datetime.strptime(entry['end_date'], '%d-%m-%Y'),
             transport_info=entry['transport_info'],
             price=int(entry['price']),
             img_links=entry['img_links']
@@ -194,29 +194,49 @@ def delete_offers():
     food_info = request.args.get('food_info')
     min_night_count = int(request.args.get('min_night_count')) if request.args.get('min_night_count') else None
     max_night_count = int(request.args.get('max_night_count')) if request.args.get('max_night_count') else None
-    start_date = request.args.get('start_date')
-    end_date = request.args.get('end_date')
+    min_start_date = request.args.get('min_start_date')
+    max_start_date = request.args.get('max_start_date')
+    min_end_date = request.args.get('min_end_date')
+    max_end_date = request.args.get('max_end_date')
     transport_info = request.args.get('transport_info')
     min_price = int(request.args.get('min_price')) if request.args.get('min_price') else None
     max_price = int(request.args.get('max_price')) if request.args.get('max_price') else None
 
-    db.delete_offers(min_offer_id,
-                     max_offer_id,
-                     name,
-                     location,
-                     min_people_count,
-                     max_people_count,
-                     food_info,
-                     min_night_count,
-                     max_night_count,
-                     start_date,
-                     end_date,
-                     transport_info,
-                     min_price,
-                     max_price)
+    db.delete_offers(min_offer_id=min_offer_id,
+                     max_offer_id=max_offer_id,
+
+                     name=name,
+                     location=location,
+
+                     min_people_count=min_people_count,
+                     max_people_count=max_people_count,
+
+                     food_info=food_info,
+
+                     min_night_count=min_night_count,
+                     max_night_count=max_night_count,
+
+                     min_start_date=min_start_date,
+                     max_start_date=max_start_date,
+                     min_end_date=min_end_date,
+                     max_end_date=max_end_date,
+
+                     transport_info=transport_info,
+
+                     min_price=min_price,
+                     max_price=max_price)
 
     return jsonify({'message': 'Selected offers deleted successfully'}), 200
 
 
+@app.route('/offers/delete/old', methods=['DELETE'])
+def delete_old_offers():
+    date = datetime.now().strftime('%Y-%m-%d')
+    db.delete_offers(max_start_date=date)
+
+    return jsonify({'message': 'Selected Offer deleted successfully'}), 200
+
+
 if __name__ == '__main__':
     app.run()
+    print(datetime.now().__repr__())
