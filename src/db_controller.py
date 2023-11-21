@@ -78,8 +78,11 @@ class DbController:
                 "night_count": row[8],
                 "start_date": row[9],
                 "end_date": row[10],
+                "transport_info": row[11],
+                "price": row[12],
                 "links": links
             }
+            # print(record)
 
             records.append(record)
 
