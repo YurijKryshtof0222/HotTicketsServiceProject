@@ -5,6 +5,7 @@ import search_container
 from selenium import webdriver
 from selenium.webdriver import ActionChains
 from src import db_controller
+from src.scrapper import scrapper_controler
 
 from src.scrapper.scrapper_controler import ScrapperController
 
@@ -34,10 +35,10 @@ if __name__ == '__main__':
 
     max_threads = 4
 
-    scrapper = ScrapperController(from_country_elements_list[10:],
-                                  to_country_elements_list,
-                                  duration_elements_list[:5],
-                                  db_controller_instance,
-                                  max_threads)
+    scrapper = ScrapperController(from_country_elements_list=from_country_elements_list[4:],
+                                  to_country_elements_list=to_country_elements_list[:10],
+                                  duration_elements_list=duration_elements_list[:5],
+                                  db_controller_instance=db_controller_instance,
+                                  max_threads=max_threads)
 
-    scrapper.traverse(limit=20, time_sleep=5)
+    scrapper.traverse(limit=10, time_sleep=10)

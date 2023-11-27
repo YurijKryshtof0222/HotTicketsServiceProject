@@ -68,6 +68,7 @@ class DbController:
                 links.append(link[2])
 
             record = {
+                "uniq_id" : row[0],
                 "offer_id": row[1],
                 "offer_name": row[2],
                 "offer_source": row[3],
@@ -221,99 +222,81 @@ class DbController:
         )
 
     def delete_offers(self,
-                      min_offer_id,
-                      max_offer_id,
-                      name,
-                      location,
-                      min_people_count,
-                      max_people_count,
-                      food_info,
-                      min_night_count,
-                      max_night_count,
-                      min_start_date,
-                      max_start_date,
-                      min_end_date,
-                      max_end_date,
-                      end_date,
-                      transport_info,
-                      min_price,
-                      max_price
+                      min_offer_id=None,
+                      max_offer_id=None,
+                      name=None,
+                      location=None,
+                      min_people_count=None,
+                      max_people_count=None,
+                      food_info=None,
+                      min_night_count=None,
+                      max_night_count=None,
+                      min_start_date=None,
+                      max_start_date=None,
+                      min_end_date=None,
+                      max_end_date=None,
+                      transport_info=None,
+                      min_price=None,
+                      max_price=None
                       ):
 
-        query_to_select = """
+        where_conditions = ""
+
+        if min_offer_id is not None:
+            where_conditions += f" AND offer_id >= {min_offer_id}"
+        if max_offer_id is not None:
+            where_conditions += f" AND offer_id <= {max_offer_id}"
+        if name is not None:
+            where_conditions += f" AND offer_name LIKE {name}%"
+        if location is not None:
+            where_conditions += f" AND location LIKE {location}% "
+        if min_people_count is not None:
+            where_conditions += f" AND people_count >= {min_people_count}"
+        if max_people_count is not None:
+            where_conditions += f" AND people_count <= {max_people_count}"
+        if food_info is not None:
+            where_conditions += f" AND food_info LIKE {food_info}%"
+        if min_night_count is not None:
+            where_conditions += f" AND night_count >= {min_night_count}"
+        if max_night_count is not None:
+            where_conditions += f" AND night_count <= {max_night_count}"
+        if transport_info is not None:
+            where_conditions += f" AND transport_info LIKE {transport_info}%"
+        if min_price is not None:
+            where_conditions += f" AND price >= {min_price}"
+        if max_price is not None:
+            where_conditions += f" AND price <= {max_price}"
+        if min_start_date is not None and min_start_date.strip():
+            where_conditions += f" AND start_date >= '{min_start_date}' "
+        if max_start_date is not None and max_start_date.strip():
+            where_conditions += f" AND start_date <= '{max_start_date}' "
+        if min_end_date is not None and min_start_date.strip():
+            where_conditions += f" AND end_date >= '{min_end_date}' "
+        if max_end_date is not None and max_start_date.strip():
+            where_conditions += f" AND end_date <= '{max_end_date}' "
+
+        query_to_select_id = """
             SELECT offer_id FROM offer
             WHERE 1=1
         """
-        where_conditions = ""
+        query_to_select_id += where_conditions
+        self.cursor.execute(query_to_select_id)
 
-        query_params = []
+        offer_link_list = self.cursor.fetchall()
 
-        if min_offer_id is not None:
-            where_conditions += " AND offer_id >= ?"
-            query_params.append(min_offer_id)
-        if max_offer_id is not None:
-            where_conditions += " AND offer_id <= ?"
-            query_params.append(max_offer_id)
-        if name is not None:
-            where_conditions += " AND offer_name LIKE ?"
-            query_params.append(f"{name}%")
-        if location is not None:
-            where_conditions += " AND location LIKE ?"
-            query_params.append(f"{location}%")
-        if min_people_count is not None:
-            where_conditions += " AND people_count >= ?"
-            query_params.append(min_people_count)
-        if max_people_count is not None:
-            where_conditions += " AND people_count <= ?"
-            query_params.append(max_people_count)
-        if food_info is not None:
-            where_conditions += " AND food_info LIKE ?"
-            query_params.append(f"{food_info}%")
-        if min_night_count is not None:
-            where_conditions += " AND night_count >= ?"
-            query_params.append(min_night_count)
-        if max_night_count is not None:
-            where_conditions += " AND night_count <= ?"
-            query_params.append(max_night_count)
-        if transport_info is not None:
-            where_conditions += " AND transport_info LIKE ?"
-            query_params.append(f"{transport_info}%")
-        if min_price is not None:
-            where_conditions += " AND price >= ?"
-            query_params.append(min_price)
-        if max_price is not None:
-            where_conditions += " AND price <= ?"
-            query_params.append(max_price)
+        for offer_link in offer_link_list:
+            query_links = "DELETE FROM offer_links WHERE offer_id = ?"
+            self.cursor.execute(query_links, (offer_link[0],))
 
-        if min_start_date is not None and min_start_date.strip():
-            where_conditions += " AND start_date >="
-            query_params.append(f"{min_start_date}%")
-        if min_start_date is not None and min_start_date.strip():
-            where_conditions += " AND start_date <="
-            query_params.append(f"{min_start_date}%")
-
-        if end_date is not None and end_date.strip():
-            where_conditions += " AND end_date >="
-            query_params.append(f"{end_date}%")
-        if end_date is not None and end_date.strip():
-            where_conditions += " AND end_date <="
-            query_params.append(f"{end_date}%")
-
-        query_to_select += where_conditions
-        self.cursor.execute(query_to_select, query_params)
-        id_list = self.cursor.fetchall()
-
-        query = """
+        query_to_delete_offers = """
             DELETE FROM offer
             WHERE 1=1
         """
+        query_to_delete_offers += where_conditions
+        print(query_to_delete_offers)
+        self.cursor.execute(query_to_delete_offers)
 
-        query += where_conditions
-        self.cursor.execute(query, query_params)
 
-        for offer_id in id_list:
-            query_links = "DELETE FROM offer_links WHERE offer_id = ?"
-            self.cursor.execute(query_links, (offer_id[0],))
 
     def update_offer(self, offer_id, offer):
         query = """

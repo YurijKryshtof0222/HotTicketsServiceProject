@@ -34,12 +34,12 @@ class ScrapperController:
 
     def traverse(self, limit=20, time_sleep=5):
         with ThreadPoolExecutor(self.__max_threads) as executor:
-            for from_country in self.__from_country_elements_list:
-                for to_country in self.__to_country_elements_list:
-                    for duration in self.__duration_elements_list[:3]:
+            for to_country in self.__to_country_elements_list:
+                for from_country in self.__from_country_elements_list:
+                    for duration in self.__duration_elements_list:
                         # Submit tasks to the thread pool
-                        executor.submit(self.__db_controller_instance,
-                                        traverse_links_thread,
+                        executor.submit(traverse_links_thread,
+                                        self.__db_controller_instance,
                                         from_country,
                                         to_country,
                                         duration,
