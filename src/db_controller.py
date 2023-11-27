@@ -137,9 +137,11 @@ class DbController:
     def get_all_offers_as_json(self,
                                page,
                                limit,
-                               name,
+                               min_uniq_id,
+                               max_uniq_id,
                                min_offer_id,
                                max_offer_id,
+                               name,
                                location,
                                min_people_count,
                                max_people_count,
@@ -170,6 +172,11 @@ class DbController:
         if max_offer_id >= 0:
             query += f" AND offer_id <= {max_offer_id}"
 
+        if min_uniq_id >= 0:
+            query += f" AND uniq_id >= {min_uniq_id}"
+        if max_uniq_id >= 0:
+            query += f" AND uniq_id <= {max_uniq_id}"
+
         if start_date and start_date.split():
             query += f" AND start_date LIKE '{start_date}%'"
         if end_date and end_date.split():
@@ -188,18 +195,26 @@ class DbController:
 
         return self.__convert_to_json(query)
 
-    def get_offer(self, offer_id):
+    def get_offer(self, uniq_id):
         query = """
-            SELECT * FROM offer WHERE offer_id = ?
+            SELECT * FROM offer WHERE uniq_id = ?
         """
 
-        self.cursor.execute(query, (offer_id,))
+        self.cursor.execute(query, (uniq_id,))
         row = self.cursor.fetchone()
 
+        query_to_select_id = f"""
+                    SELECT offer_id FROM offer
+                    WHERE uniq_id={uniq_id}
+                """
+        self.cursor.execute(query_to_select_id)
+        offer_id = self.cursor.fetchone()
+        print(offer_id)
+
         query_links = '''
-                                           SELECT * FROM offer_links WHERE offer_id = ?;
-                                       '''
-        self.cursor.execute(query_links, (offer_id,))
+                        SELECT * FROM offer_links WHERE offer_id = ?;
+                      '''
+        self.cursor.execute(query_links, (offer_id[0],))
         links_cols = self.cursor.fetchall()
         links = []
         for link in links_cols:
@@ -222,6 +237,8 @@ class DbController:
         )
 
     def delete_offers(self,
+                      min_uniq_id=None,
+                      max_uniq_id=None,
                       min_offer_id=None,
                       max_offer_id=None,
                       name=None,
@@ -242,6 +259,10 @@ class DbController:
 
         where_conditions = ""
 
+        if min_offer_id is not None:
+            where_conditions += f" AND uniq_id >= {min_uniq_id}"
+        if max_offer_id is not None:
+            where_conditions += f" AND uniq_id <= {max_uniq_id}"
         if min_offer_id is not None:
             where_conditions += f" AND offer_id >= {min_offer_id}"
         if max_offer_id is not None:

@@ -15,15 +15,14 @@ def index():
     return '<h1>Hello</h1>'
 
 
-@app.route('/offer/<int:offer_id>', methods=['GET'])
-def get_offer(offer_id):
-    return db.get_offer_as_json(offer_id)
-
-
-@app.route('/offers', methods=['GET'])
-def get_offers():
+@app.route('/offer/<int:uniq_id>', methods=['GET'])
+def get_offer(uniq_id):
     page = int(request.args.get('page', 1))
     limit = int(request.args.get('limit', 10))
+
+    min_uniq_id = int(request.args.get('min_uniq_id', uniq_id))
+    max_uniq_id = int(request.args.get('max_uniq_id', uniq_id))
+
     min_offer_id = int(request.args.get('min_offer_id', 0))
     max_offer_id = int(request.args.get('max_offer_id', 9999999999))
     name = str(request.args.get('name', ''))
@@ -41,9 +40,52 @@ def get_offers():
 
     return db.get_all_offers_as_json(page,
                                      limit=limit,
-                                     name=name,
+                                     min_uniq_id=uniq_id,
+                                     max_uniq_id=uniq_id,
                                      min_offer_id=min_offer_id,
                                      max_offer_id=max_offer_id,
+                                     name=name,
+                                     location=location,
+                                     min_people_count=min_people_count,
+                                     max_people_count=max_people_count,
+                                     food_info=food_info,
+                                     min_night_count=min_night_count,
+                                     max_night_count=max_night_count,
+                                     start_date=start_date,
+                                     end_date=end_date,
+                                     transport_info=transport_info,
+                                     min_price=min_price,
+                                     max_price=max_price)
+
+
+@app.route('/offers', methods=['GET'])
+def get_offers():
+    page = int(request.args.get('page', 1))
+    limit = int(request.args.get('limit', 10))
+    min_uniq_id = int(request.args.get('min_uniq_id', 0))
+    max_uniq_id = int(request.args.get('max_uniq_id', 9999999999))
+    min_offer_id = int(request.args.get('min_offer_id', 0))
+    max_offer_id = int(request.args.get('max_offer_id', 9999999999))
+    name = str(request.args.get('name', ''))
+    location = str(request.args.get('location', ''))
+    min_people_count = int(request.args.get('min_people_count', 1))
+    max_people_count = int(request.args.get('max_people_count', 10))
+    food_info = str(request.args.get('food_info', ''))
+    min_night_count = int(request.args.get('min_night_count', 1))
+    max_night_count = int(request.args.get('max_night_count', 12))
+    start_date = str(request.args.get('start_date', ''))
+    end_date = str(request.args.get('end_date', ''))
+    transport_info = request.args.get('transport_info', '')
+    min_price = int(request.args.get('min_price', 0))
+    max_price = int(request.args.get('max_price', 999999999))
+
+    return db.get_all_offers_as_json(page,
+                                     limit=limit,
+                                     min_uniq_id=min_uniq_id,
+                                     max_uniq_id=max_uniq_id,
+                                     min_offer_id=min_offer_id,
+                                     max_offer_id=max_offer_id,
+                                     name=name,
                                      location=location,
                                      min_people_count=min_people_count,
                                      max_people_count=max_people_count,
@@ -64,6 +106,8 @@ def get_offers_filter_by_json():
     page = int(request.args.get('page', 1))
     limit = int(request.args.get('limit', 10))
 
+    min_uniq_id = int(data.get('min_uniq_id', 0))
+    max_uniq_id = int(data.get('max_uniq_id', 9999999999))
     min_offer_id = int(data.get('min_offer_id', 0))
     max_offer_id = int(data.get('max_offer_id', 9999999999))
     name = str(data.get('name', ''))
@@ -82,6 +126,8 @@ def get_offers_filter_by_json():
     return db.get_all_offers_as_json(page,
                                      limit=limit,
                                      name=name,
+                                     min_uniq_id=min_uniq_id,
+                                     max_uniq_id=max_uniq_id,
                                      min_offer_id=min_offer_id,
                                      max_offer_id=max_offer_id,
                                      location=location,
