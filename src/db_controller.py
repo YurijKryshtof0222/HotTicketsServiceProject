@@ -158,12 +158,12 @@ class DbController:
 
         query = f"""
                SELECT * FROM offer
-               WHERE offer_name LIKE '{name}%'
-                 AND location LIKE '{location}%'
+               WHERE offer_name LIKE '%{name}%'
+                 AND location LIKE '%{location}%'
                  AND people_count BETWEEN {min_people_count} AND {max_people_count}
-                 AND food_info LIKE '{food_info}%'
+                 AND food_info LIKE '%{food_info}%'
                  AND night_count BETWEEN {min_night_count} AND {max_night_count}
-                 AND transport_info LIKE '{transport_info}%'
+                 AND transport_info LIKE '%{transport_info}%'
                  AND price BETWEEN {min_price} AND {max_price}
            """
 
